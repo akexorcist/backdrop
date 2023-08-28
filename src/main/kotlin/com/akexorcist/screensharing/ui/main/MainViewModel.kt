@@ -105,6 +105,7 @@ class MainViewModel(
         if (audio.name == _uiState.value.selectedAudioInput?.name) return@launch
         if (audio.name == DeviceName.AUDIO_NONE) {
             audioRepository.stopAudioPlayback()
+            audioRepository.setAudioInput(DeviceName.AUDIO_NONE)
             _uiState.update { it.copy(selectedAudioInput = noSelectedAudio) }
             return@launch
         }
@@ -123,6 +124,7 @@ class MainViewModel(
         if (audio.name == _uiState.value.selectedAudioOutput?.name) return@launch
         if (audio.name == DeviceName.AUDIO_NONE) {
             audioRepository.stopAudioPlayback()
+            audioRepository.setAudioOutput(DeviceName.AUDIO_NONE)
             _uiState.update { it.copy(selectedAudioOutput = noSelectedAudio) }
             return@launch
         }
