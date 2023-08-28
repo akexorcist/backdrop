@@ -5,8 +5,10 @@ package com.akexorcist.screensharing.ui.main
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -264,6 +266,7 @@ private fun DeviceChooser(
     Column(
         modifier = Modifier
             .surfaceBackground()
+            .verticalScroll(rememberScrollState())
             .padding(8.dp)
     ) {
         Spacer(Modifier.size(8.dp))
@@ -282,7 +285,7 @@ private fun DeviceChooser(
             Row(
                 modifier = Modifier
                     .wrapContentWidth()
-                    .clip(RoundedCornerShape(4.dp))
+                    .clip(RoundedCornerShape(8.dp))
                     .selectable(
                         selected = name == selectedDevice,
                         onClick = { onDeviceSelect(name) },
