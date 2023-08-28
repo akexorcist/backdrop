@@ -15,7 +15,7 @@ interface AudioRepository {
 
     fun setAudioOutput(name: String)
 
-    fun startAudioPlayback()
+    fun startAudioPlayback(): PlaybackStatus
 
     fun stopAudioPlayback()
 }
@@ -41,7 +41,7 @@ class DefaultAudioRepository : AudioRepository {
     private fun getAvailableAudioInputMixers(): List<Pair<Mixer, Mixer.Info>> {
         return AudioSystem.getMixerInfo()
             .map { mixerInfo -> AudioSystem.getMixer(mixerInfo) to mixerInfo }
-            .filter { (mixer, _) -> mixer.targetLineInfo.any { it.lineClass == TargetDataLine::class.java } }
+            .filter { (mixer, _) -> getSupportedLine(mixer, TargetDataLine::class.java) != null }
     }
 
     override fun getAvailableAudioOutputs(): Flow<List<Pair<Mixer, Mixer.Info>>> = callbackFlow {
@@ -54,7 +54,7 @@ class DefaultAudioRepository : AudioRepository {
     private fun getAvailableAudioOutputMixers(): List<Pair<Mixer, Mixer.Info>> {
         return AudioSystem.getMixerInfo()
             .map { mixerInfo -> AudioSystem.getMixer(mixerInfo) to mixerInfo }
-            .filter { (mixer, _) -> mixer.sourceLineInfo.any { it.lineClass == SourceDataLine::class.java } }
+            .filter { (mixer, _) -> getSupportedLine(mixer, SourceDataLine::class.java) != null }
     }
 
     override fun setAudioInput(name: String) {
@@ -69,12 +69,13 @@ class DefaultAudioRepository : AudioRepository {
             ?.let { AudioSystem.getMixer(it) }
     }
 
-    override fun startAudioPlayback() {
-        println("startAudioPlayback")
-        val inputMixer = this.inputMixer ?: return
-        val outputMixer = this.outputMixer ?: return
-        val targetDataLine = getSupportedLine(inputMixer, TargetDataLine::class.java) ?: return
-        val sourceDataLine = getSupportedLine(outputMixer, SourceDataLine::class.java) ?: return
+    override fun startAudioPlayback(): PlaybackStatus {
+        val inputMixer = this.inputMixer ?: return PlaybackStatus.AudioInputError
+        val outputMixer = this.outputMixer ?: return PlaybackStatus.AudioOutputError
+        val targetDataLine =
+            getSupportedLine(inputMixer, TargetDataLine::class.java) ?: return PlaybackStatus.AudioInputError
+        val sourceDataLine =
+            getSupportedLine(outputMixer, SourceDataLine::class.java) ?: return PlaybackStatus.AudioOutputError
         targetDataLine.apply {
             open()
             start()
@@ -84,7 +85,6 @@ class DefaultAudioRepository : AudioRepository {
             start()
         }
 
-        println("playing")
         this.currentAudioPlaybackJob = coroutineScope.launch {
             val buffer = ByteArray(1024)
             while (isActive) {
@@ -96,6 +96,7 @@ class DefaultAudioRepository : AudioRepository {
 
         this.targetDataLine = targetDataLine
         this.sourceDataLine = sourceDataLine
+        return PlaybackStatus.Playing
     }
 
     override fun stopAudioPlayback() {
@@ -118,10 +119,8 @@ class DefaultAudioRepository : AudioRepository {
     private fun <T> getSupportedLine(mixer: Mixer, lineClass: Class<T>): T? = try {
         mixer.getLine((DataLine.Info(lineClass, null)))
     } catch (e: LineUnavailableException) {
-        e.printStackTrace()
         null
     } catch (e: IllegalArgumentException) {
-        e.printStackTrace()
         null
     } as? T
 

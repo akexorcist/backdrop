@@ -51,9 +51,11 @@ private fun MainScreen(
     onAudioInputSelect: (Audio) -> Unit,
     onAudioOutputSelect: (Audio) -> Unit,
 ) {
-    val currentVideo = uiState.selectedVideo
-    val currentAudioInput = uiState.selectedAudioInput
+    val selectedVideo = uiState.selectedVideo
+    val selectedAudioInput = uiState.selectedAudioInput
     val selectedAudioOutput = uiState.selectedAudioOutput
+    val selectedAudioInputError = uiState.selectedAudioInputError
+    val selectedAudioOutputError = uiState.selectedAudioOutputError
     val availableVideo = uiState.availableVideos
     val availableAudioInputs = uiState.availableAudioInputs
     val availableAudioOutputs = uiState.availableAudioOutputs
@@ -62,37 +64,39 @@ private fun MainScreen(
             .background(color = MaterialTheme.colors.background)
     ) {
         VideoSurface(
-            currentVideo = currentVideo,
+            selectedVideo = selectedVideo,
             availableImageData = availableImageData,
         )
         Row(modifier = Modifier.padding(32.dp)) {
             // Webcam
             VideoChooser(
-                currentVideo = currentVideo,
+                selectedVideo = selectedVideo,
                 availableVideos = availableVideo,
                 onVideoSelect = onVideoSelect,
             )
             Spacer(Modifier.size(16.dp))
             VideoResolutionInformation(
-                video = currentVideo,
+                video = selectedVideo,
                 onResolutionSelect = onVideoResolutionSelect,
             )
 
             VideoStatusInformation(
-                currentVideo = currentVideo,
+                currentVideo = selectedVideo,
                 availableImageData = availableImageData,
             )
 
             // Audio
             Spacer(Modifier.size(16.dp))
             AudioInputChooser(
-                currentAudioInput = currentAudioInput,
+                selectedAudioInput = selectedAudioInput,
+                selectedAudioInputError = selectedAudioInputError,
                 availableAudioInputs = availableAudioInputs,
                 onAudioInputSelect = onAudioInputSelect,
             )
             Spacer(Modifier.size(16.dp))
             AudioOutputChooser(
-                currentAudioOutput = selectedAudioOutput,
+                selectedAudioOutput = selectedAudioOutput,
+                selectedAudioOutputError = selectedAudioOutputError,
                 availableAudioOutputs = availableAudioOutputs,
                 onAudioOutputSelect = onAudioOutputSelect,
             )
@@ -129,10 +133,10 @@ private fun VideoStatusInformation(
 
 @Composable
 private fun VideoSurface(
-    currentVideo: Video?,
+    selectedVideo: Video?,
     availableImageData: ImageData?,
 ) {
-    if (currentVideo?.name == DeviceName.VIDEO_NONE) return
+    if (selectedVideo?.name == DeviceName.VIDEO_NONE) return
     if (availableImageData == null) return
     val imageRatio = availableImageData.image.width.toFloat() / availableImageData.image.height
     Box(
@@ -204,13 +208,14 @@ private fun VideoResolutionInformation(
 
 @Composable
 private fun VideoChooser(
-    currentVideo: Video?,
+    selectedVideo: Video?,
     availableVideos: List<Video>,
     onVideoSelect: (Video) -> Unit,
 ) {
     DeviceChooser(
         label = "Video",
-        selectedDevice = currentVideo?.name,
+        selectedDevice = selectedVideo?.name,
+        selectedDeviceError = false,
         availableDeviceNames = availableVideos.map { it.name },
         onDeviceSelect = { selectedDevice ->
             availableVideos
@@ -222,13 +227,15 @@ private fun VideoChooser(
 
 @Composable
 private fun AudioInputChooser(
-    currentAudioInput: Audio?,
+    selectedAudioInput: Audio?,
+    selectedAudioInputError: Boolean,
     availableAudioInputs: List<Audio>,
     onAudioInputSelect: (Audio) -> Unit,
 ) {
     DeviceChooser(
         label = "Audio Input",
-        selectedDevice = currentAudioInput?.name,
+        selectedDevice = selectedAudioInput?.name,
+        selectedDeviceError = selectedAudioInputError,
         availableDeviceNames = availableAudioInputs.map { it.name },
         onDeviceSelect = { selectedAudio ->
             availableAudioInputs
@@ -240,13 +247,15 @@ private fun AudioInputChooser(
 
 @Composable
 private fun AudioOutputChooser(
-    currentAudioOutput: Audio?,
+    selectedAudioOutput: Audio?,
+    selectedAudioOutputError: Boolean,
     availableAudioOutputs: List<Audio>,
     onAudioOutputSelect: (Audio) -> Unit,
 ) {
     DeviceChooser(
         label = "Audio Output",
-        selectedDevice = currentAudioOutput?.name,
+        selectedDevice = selectedAudioOutput?.name,
+        selectedDeviceError = selectedAudioOutputError,
         availableDeviceNames = availableAudioOutputs.map { it.name },
         onDeviceSelect = { selectedAudio ->
             availableAudioOutputs
@@ -260,6 +269,7 @@ private fun AudioOutputChooser(
 private fun DeviceChooser(
     label: String,
     selectedDevice: String?,
+    selectedDeviceError: Boolean,
     availableDeviceNames: List<String>,
     onDeviceSelect: (String) -> Unit,
 ) {
@@ -297,11 +307,24 @@ private fun DeviceChooser(
                 RadioButton(
                     selected = name == selectedDevice,
                     onClick = null,
+                    colors = when {
+                        name == selectedDevice && selectedDeviceError -> RadioButtonDefaults.colors(
+                            selectedColor = MaterialTheme.colors.error,
+                            unselectedColor = MaterialTheme.colors.onError.copy(alpha = 0.6f),
+                            disabledColor = MaterialTheme.colors.onError.copy(alpha = ContentAlpha.disabled),
+                        )
+
+                        else -> RadioButtonDefaults.colors()
+                    }
                 )
                 Spacer(Modifier.size(8.dp))
                 Text(
                     text = name,
-                    color = MaterialTheme.colors.onSurface,
+                    color = when {
+                        name == selectedDevice && selectedDeviceError -> MaterialTheme.colors.error
+                        name == selectedDevice -> MaterialTheme.colors.secondary
+                        else -> MaterialTheme.colors.onSurface
+                    }
                 )
             }
             if (index != availableDeviceNames.lastIndex) {
