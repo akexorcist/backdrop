@@ -59,6 +59,7 @@ class DefaultWebcamRepository : WebcamRepository {
                 it.close()
                 it.removeWebcamListener(webcamListener)
             }
+        currentWebcam.update { null }
     }
 
     override fun collectCurrentWebcam(): Flow<Webcam?> = currentWebcam
