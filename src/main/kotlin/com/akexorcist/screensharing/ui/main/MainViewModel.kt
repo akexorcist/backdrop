@@ -68,7 +68,7 @@ class MainViewModel(
             val newAudios = listOf(noSelectedAudio) + audios.map { (_, info) ->
                 Audio(info.name)
             }
-            if (_uiState.value.availableAudioInputs != newAudios) {
+            if (_uiState.value.availableAudioOutputs != newAudios) {
                 _uiState.update { uiState ->
                     uiState.copy(availableAudioOutputs = newAudios)
                 }
@@ -78,7 +78,7 @@ class MainViewModel(
 
     fun selectVideo(video: Video) {
         if (video.name == _uiState.value.selectedVideo?.name) return
-        if (video.name == DeviceName.AUDIO_NONE) {
+        if (video.name == DeviceName.VIDEO_NONE) {
             webcamRepository.close()
             _uiState.update { it.copy(selectedVideo = noSelectedVideo) }
             return
@@ -103,6 +103,11 @@ class MainViewModel(
 
     fun selectAudioInput(audio: Audio) = coroutineScope.launch {
         if (audio.name == _uiState.value.selectedAudioInput?.name) return@launch
+        if (audio.name == DeviceName.AUDIO_NONE) {
+            audioRepository.stopAudioPlayback()
+            _uiState.update { it.copy(selectedAudioInput = noSelectedAudio) }
+            return@launch
+        }
         audioRepository.apply {
             stopAudioPlayback()
             delay(300L)
@@ -116,6 +121,11 @@ class MainViewModel(
 
     fun selectAudioOutput(audio: Audio) = coroutineScope.launch {
         if (audio.name == _uiState.value.selectedAudioOutput?.name) return@launch
+        if (audio.name == DeviceName.AUDIO_NONE) {
+            audioRepository.stopAudioPlayback()
+            _uiState.update { it.copy(selectedAudioOutput = noSelectedAudio) }
+            return@launch
+        }
         audioRepository.apply {
             stopAudioPlayback()
             delay(300L)
