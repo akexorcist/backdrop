@@ -2,13 +2,10 @@
 
 package com.akexorcist.screensharing.ui.main
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,6 +19,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.akexorcist.screensharing.config.DeviceName
 import com.akexorcist.screensharing.data.*
+
+private val SectionWidth = 300.dp
 
 @Composable
 fun MainRoute(mainViewModel: MainViewModel) {
@@ -60,30 +59,42 @@ private fun MainScreen(
     val availableAudioInputs = uiState.availableAudioInputs
     val availableAudioOutputs = uiState.availableAudioOutputs
     Box(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
             .background(color = MaterialTheme.colors.background)
     ) {
         VideoSurface(
             selectedVideo = selectedVideo,
             availableImageData = availableImageData,
         )
-        Row(modifier = Modifier.padding(32.dp)) {
+        Row(
+            modifier = Modifier
+                .horizontalScroll(rememberScrollState())
+                .fillMaxSize()
+                .padding(32.dp)
+        ) {
             // Webcam
-            VideoChooser(
-                selectedVideo = selectedVideo,
-                availableVideos = availableVideo,
-                onVideoSelect = onVideoSelect,
-            )
-            Spacer(Modifier.size(16.dp))
-            VideoResolutionInformation(
-                video = selectedVideo,
-                onResolutionSelect = onVideoResolutionSelect,
-            )
-
-            VideoStatusInformation(
-                currentVideo = selectedVideo,
-                availableImageData = availableImageData,
-            )
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState())
+            ) {
+                VideoChooser(
+                    selectedVideo = selectedVideo,
+                    availableVideos = availableVideo,
+                    onVideoSelect = onVideoSelect,
+                )
+                Spacer(Modifier.size(16.dp))
+                VideoStatusInformation(
+                    modifier = Modifier.width(SectionWidth),
+                    currentVideo = selectedVideo,
+                    availableImageData = availableImageData,
+                )
+                Spacer(Modifier.size(16.dp))
+                VideoResolutionInformation(
+                    modifier = Modifier.width(SectionWidth),
+                    video = selectedVideo,
+                    onResolutionSelect = onVideoResolutionSelect,
+                )
+            }
 
             // Audio
             Spacer(Modifier.size(16.dp))
@@ -106,28 +117,31 @@ private fun MainScreen(
 
 @Composable
 private fun VideoStatusInformation(
+    modifier: Modifier,
     currentVideo: Video?,
     availableImageData: ImageData?,
 ) {
     if (currentVideo?.name == DeviceName.VIDEO_NONE) return
     availableImageData ?: return
-    Row {
-        Spacer(Modifier.size(16.dp))
-        Column {
-            Column(
-                modifier = Modifier
-                    .surfaceBackground()
-                    .padding(16.dp)
-            ) {
-                val width = availableImageData.image.width
-                val height = availableImageData.image.height
-                val fps = availableImageData.frameRate.toInt()
-                Text(
-                    text = "$width x $height (${fps} FPS)",
-                    color = MaterialTheme.colors.onSurface,
-                )
-            }
-        }
+    Column(
+        modifier = modifier
+            .surfaceBackground()
+            .padding(16.dp)
+    ) {
+        val width = availableImageData.image.width
+        val height = availableImageData.image.height
+        val fps = availableImageData.frameRate.toInt()
+        Text(
+            text = "Current Resolution",
+            color = MaterialTheme.colors.secondary,
+            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.subtitle1,
+        )
+        Spacer(Modifier.size(24.dp))
+        Text(
+            text = "$width x $height (${fps} FPS)",
+            color = MaterialTheme.colors.onSurface,
+        )
     }
 }
 
@@ -159,13 +173,14 @@ private fun VideoSurface(
 
 @Composable
 private fun VideoResolutionInformation(
+    modifier: Modifier,
     video: Video?,
     onResolutionSelect: (Video, Video.Resolution) -> Unit,
 ) {
     video ?: return
     if (video.availableResolutions.isEmpty()) return
     Column(
-        modifier = Modifier
+        modifier = modifier
             .surfaceBackground()
             .padding(16.dp)
     ) {
@@ -213,6 +228,7 @@ private fun VideoChooser(
     onVideoSelect: (Video) -> Unit,
 ) {
     DeviceChooser(
+        modifier = Modifier.width(SectionWidth),
         label = "Video",
         selectedDevice = selectedVideo?.name,
         selectedDeviceError = false,
@@ -233,6 +249,9 @@ private fun AudioInputChooser(
     onAudioInputSelect: (Audio) -> Unit,
 ) {
     DeviceChooser(
+        modifier = Modifier
+            .width(SectionWidth)
+            .verticalScroll(rememberScrollState()),
         label = "Audio Input",
         selectedDevice = selectedAudioInput?.name,
         selectedDeviceError = selectedAudioInputError,
@@ -253,6 +272,9 @@ private fun AudioOutputChooser(
     onAudioOutputSelect: (Audio) -> Unit,
 ) {
     DeviceChooser(
+        modifier = Modifier
+            .width(SectionWidth)
+            .verticalScroll(rememberScrollState()),
         label = "Audio Output",
         selectedDevice = selectedAudioOutput?.name,
         selectedDeviceError = selectedAudioOutputError,
@@ -267,6 +289,7 @@ private fun AudioOutputChooser(
 
 @Composable
 private fun DeviceChooser(
+    modifier: Modifier,
     label: String,
     selectedDevice: String?,
     selectedDeviceError: Boolean,
@@ -274,9 +297,8 @@ private fun DeviceChooser(
     onDeviceSelect: (String) -> Unit,
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .surfaceBackground()
-            .verticalScroll(rememberScrollState())
             .padding(8.dp)
     ) {
         Spacer(Modifier.size(8.dp))
