@@ -4,12 +4,12 @@ import com.akexorcist.screensharing.config.DeviceName
 import com.akexorcist.screensharing.data.AudioRepository
 import com.akexorcist.screensharing.data.ImageData
 import com.akexorcist.screensharing.data.PlaybackStatus
-import com.akexorcist.screensharing.data.WebcamRepository
+import com.akexorcist.screensharing.data.VideoRepository
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
 class MainViewModel(
-    private val webcamRepository: WebcamRepository,
+    private val videoRepository: VideoRepository,
     private val audioRepository: AudioRepository,
 ) {
     private val coroutineScope = CoroutineScope(Dispatchers.IO + Job())
@@ -29,10 +29,10 @@ class MainViewModel(
     )
     val uiState: StateFlow<MainUiState> = _uiState
 
-    val availableImageData: StateFlow<ImageData?> = webcamRepository.collectAvailableImageData()
+    val availableImageData: StateFlow<ImageData?> = videoRepository.collectAvailableImageData()
 
     suspend fun observeVideoInput() = coroutineScope.launch {
-        webcamRepository.getAvailableWebcam().collectLatest { videos ->
+        videoRepository.getAvailableWebcam().collectLatest { videos ->
             val newVideos = listOf(noSelectedVideo) + videos.map { webcam ->
                 Video(
                     name = webcam.name,
@@ -77,18 +77,18 @@ class MainViewModel(
     fun selectVideo(video: Video) {
         if (video.name == _uiState.value.selectedVideo?.name) return
         if (video.name == DeviceName.VIDEO_NONE) {
-            webcamRepository.close()
+            videoRepository.close()
             _uiState.update { it.copy(selectedVideo = noSelectedVideo) }
             return
         }
-        webcamRepository.open(video.name)
+        videoRepository.open(video.name)
         _uiState.update {
             it.copy(selectedVideo = video)
         }
     }
 
     fun setVideoResolution(video: Video, resolution: Video.Resolution) {
-        webcamRepository.open(
+        videoRepository.open(
             name = video.name,
             dimension = resolution.toDimension(),
         )

@@ -6,10 +6,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
-import com.akexorcist.screensharing.data.AudioRepository
-import com.akexorcist.screensharing.data.DefaultAudioRepository
-import com.akexorcist.screensharing.data.DefaultWebcamRepository
-import com.akexorcist.screensharing.data.WebcamRepository
 import com.akexorcist.screensharing.di.AppModule
 import com.akexorcist.screensharing.ui.main.MainRoute
 import com.akexorcist.screensharing.ui.main.MainViewModel
