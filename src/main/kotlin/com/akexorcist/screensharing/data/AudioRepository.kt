@@ -5,7 +5,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import javax.sound.sampled.*
 
-
 interface AudioRepository {
     fun getAvailableAudioInputs(): Flow<List<Pair<Mixer, Mixer.Info>>>
 
@@ -59,13 +58,13 @@ class DefaultAudioRepository : AudioRepository {
 
     override fun setAudioInput(name: String) {
         this.inputMixer = AudioSystem.getMixerInfo()
-            .find { it.name == name }
+            .find { it.name == name && getSupportedLine(AudioSystem.getMixer(it), TargetDataLine::class.java) != null }
             ?.let { AudioSystem.getMixer(it) }
     }
 
     override fun setAudioOutput(name: String) {
         this.outputMixer = AudioSystem.getMixerInfo()
-            .find { it.name == name }
+            .find { it.name == name && getSupportedLine(AudioSystem.getMixer(it), SourceDataLine::class.java) != null }
             ?.let { AudioSystem.getMixer(it) }
     }
 
@@ -123,16 +122,4 @@ class DefaultAudioRepository : AudioRepository {
     } catch (e: IllegalArgumentException) {
         null
     } as? T
-
-    private fun printAudioFormat(label: String, format: AudioFormat) {
-        println(
-            "$label :: Sample Rate ${format.sampleRate}, " +
-                    "Encoding ${format.encoding}, " +
-                    "Channels ${format.channels}, " +
-                    "Sample Size ${format.sampleSizeInBits}, " +
-                    "Frame Size ${format.frameSize}, " +
-                    "Frame rate ${format.frameRate}, " +
-                    "Big Endian ${format.isBigEndian}"
-        )
-    }
 }
