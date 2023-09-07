@@ -12,9 +12,9 @@ fun defaultMainUiState(
     selectedAudioOutput = selectedOutputAudio,
     selectedAudioInputError = false,
     selectedAudioOutputError = false,
-    availableVideos = listOf(),
-    availableAudioInputs = listOf(),
-    availableAudioOutputs = listOf(),
+    availableVideos = null,
+    availableAudioInputs = null,
+    availableAudioOutputs = null,
 )
 
 data class MainUiState(
@@ -23,14 +23,13 @@ data class MainUiState(
     val selectedAudioOutput: Audio?,
     val selectedAudioInputError: Boolean,
     val selectedAudioOutputError: Boolean,
-    val availableVideos: List<Video>,
-    val availableAudioInputs: List<Audio>,
-    val availableAudioOutputs: List<Audio>,
+    val availableVideos: List<Video>?,
+    val availableAudioInputs: List<Audio>?,
+    val availableAudioOutputs: List<Audio>?,
 )
 
 data class Video(
     val name: String,
-    val selectedResolution: Resolution,
     val availableResolutions: List<Resolution>,
     val fps: Double,
 ) {

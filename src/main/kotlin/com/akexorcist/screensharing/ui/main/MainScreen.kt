@@ -2,6 +2,7 @@
 
 package com.akexorcist.screensharing.ui.main
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
@@ -92,6 +93,7 @@ private fun MainScreen(
                 VideoResolutionInformation(
                     modifier = Modifier.width(SectionWidth),
                     video = selectedVideo,
+                    availableImageData = availableImageData,
                     onResolutionSelect = onVideoResolutionSelect,
                 )
             }
@@ -175,10 +177,16 @@ private fun VideoSurface(
 private fun VideoResolutionInformation(
     modifier: Modifier,
     video: Video?,
+    availableImageData: ImageData?,
     onResolutionSelect: (Video, Video.Resolution) -> Unit,
 ) {
     video ?: return
+    availableImageData ?: return
     if (video.availableResolutions.isEmpty()) return
+    val selectedVideoResolution = Video.Resolution(
+        width = availableImageData.image.width,
+        height = availableImageData.image.height,
+    )
     Column(
         modifier = modifier
             .surfaceBackground()
@@ -197,7 +205,7 @@ private fun VideoResolutionInformation(
                     .wrapContentWidth()
                     .clip(RoundedCornerShape(4.dp))
                     .selectable(
-                        selected = resolution == video.selectedResolution,
+                        selected = resolution == selectedVideoResolution,
                         onClick = { onResolutionSelect(video, resolution) },
                         role = Role.RadioButton,
                     )
@@ -205,7 +213,7 @@ private fun VideoResolutionInformation(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 RadioButton(
-                    selected = resolution == video.selectedResolution,
+                    selected = resolution == selectedVideoResolution,
                     onClick = null,
                 )
                 Spacer(Modifier.size(8.dp))
@@ -224,7 +232,7 @@ private fun VideoResolutionInformation(
 @Composable
 private fun VideoChooser(
     selectedVideo: Video?,
-    availableVideos: List<Video>,
+    availableVideos: List<Video>?,
     onVideoSelect: (Video) -> Unit,
 ) {
     DeviceChooser(
@@ -232,10 +240,10 @@ private fun VideoChooser(
         label = "Video",
         selectedDevice = selectedVideo?.name,
         selectedDeviceError = false,
-        availableDeviceNames = availableVideos.map { it.name },
+        availableDeviceNames = availableVideos?.map { it.name },
         onDeviceSelect = { selectedDevice ->
             availableVideos
-                .find { it.name == selectedDevice }
+                ?.find { it.name == selectedDevice }
                 ?.let { onVideoSelect(it) }
         }
     )
@@ -245,7 +253,7 @@ private fun VideoChooser(
 private fun AudioInputChooser(
     selectedAudioInput: Audio?,
     selectedAudioInputError: Boolean,
-    availableAudioInputs: List<Audio>,
+    availableAudioInputs: List<Audio>?,
     onAudioInputSelect: (Audio) -> Unit,
 ) {
     DeviceChooser(
@@ -255,10 +263,10 @@ private fun AudioInputChooser(
         label = "Audio Input",
         selectedDevice = selectedAudioInput?.name,
         selectedDeviceError = selectedAudioInputError,
-        availableDeviceNames = availableAudioInputs.map { it.name },
+        availableDeviceNames = availableAudioInputs?.map { it.name },
         onDeviceSelect = { selectedAudio ->
             availableAudioInputs
-                .find { it.name == selectedAudio }
+                ?.find { it.name == selectedAudio }
                 ?.let { onAudioInputSelect(it) }
         }
     )
@@ -268,7 +276,7 @@ private fun AudioInputChooser(
 private fun AudioOutputChooser(
     selectedAudioOutput: Audio?,
     selectedAudioOutputError: Boolean,
-    availableAudioOutputs: List<Audio>,
+    availableAudioOutputs: List<Audio>?,
     onAudioOutputSelect: (Audio) -> Unit,
 ) {
     DeviceChooser(
@@ -278,10 +286,10 @@ private fun AudioOutputChooser(
         label = "Audio Output",
         selectedDevice = selectedAudioOutput?.name,
         selectedDeviceError = selectedAudioOutputError,
-        availableDeviceNames = availableAudioOutputs.map { it.name },
+        availableDeviceNames = availableAudioOutputs?.map { it.name },
         onDeviceSelect = { selectedAudio ->
             availableAudioOutputs
-                .find { it.name == selectedAudio }
+                ?.find { it.name == selectedAudio }
                 ?.let { onAudioOutputSelect(it) }
         }
     )
@@ -293,7 +301,7 @@ private fun DeviceChooser(
     label: String,
     selectedDevice: String?,
     selectedDeviceError: Boolean,
-    availableDeviceNames: List<String>,
+    availableDeviceNames: List<String>?,
     onDeviceSelect: (String) -> Unit,
 ) {
     Column(
@@ -313,46 +321,67 @@ private fun DeviceChooser(
             Spacer(Modifier.size(16.dp))
         }
         Spacer(Modifier.size(16.dp))
-        availableDeviceNames.forEachIndexed { index, name ->
-            Row(
-                modifier = Modifier
-                    .wrapContentWidth()
-                    .clip(RoundedCornerShape(8.dp))
-                    .selectable(
-                        selected = name == selectedDevice,
-                        onClick = { onDeviceSelect(name) },
-                        role = Role.RadioButton,
-                    )
-                    .padding(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                RadioButton(
-                    selected = name == selectedDevice,
-                    onClick = null,
-                    colors = when {
-                        name == selectedDevice && selectedDeviceError -> RadioButtonDefaults.colors(
-                            selectedColor = MaterialTheme.colors.error,
-                            unselectedColor = MaterialTheme.colors.onError.copy(alpha = 0.6f),
-                            disabledColor = MaterialTheme.colors.onError.copy(alpha = ContentAlpha.disabled),
-                        )
+        AnimatedVisibility(visible = availableDeviceNames != null) {
+            if (availableDeviceNames != null) {
+                Column {
+                    availableDeviceNames.forEachIndexed { index, name ->
+                        Row(
+                            modifier = Modifier
+                                .wrapContentWidth()
+                                .clip(RoundedCornerShape(8.dp))
+                                .selectable(
+                                    selected = name == selectedDevice,
+                                    onClick = { onDeviceSelect(name) },
+                                    role = Role.RadioButton,
+                                )
+                                .padding(8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            RadioButton(
+                                selected = name == selectedDevice,
+                                onClick = null,
+                                colors = when {
+                                    name == selectedDevice && selectedDeviceError -> RadioButtonDefaults.colors(
+                                        selectedColor = MaterialTheme.colors.error,
+                                        unselectedColor = MaterialTheme.colors.onError.copy(alpha = 0.6f),
+                                        disabledColor = MaterialTheme.colors.onError.copy(alpha = ContentAlpha.disabled),
+                                    )
 
-                        else -> RadioButtonDefaults.colors()
+                                    else -> RadioButtonDefaults.colors()
+                                }
+                            )
+                            Spacer(Modifier.size(8.dp))
+                            Text(
+                                text = name,
+                                color = when {
+                                    name == selectedDevice && selectedDeviceError -> MaterialTheme.colors.error
+                                    name == selectedDevice -> MaterialTheme.colors.secondary
+                                    else -> MaterialTheme.colors.onSurface
+                                }
+                            )
+                        }
+                        if (index != availableDeviceNames.lastIndex) {
+                            Spacer(Modifier.size(8.dp))
+                        }
                     }
-                )
-                Spacer(Modifier.size(8.dp))
-                Text(
-                    text = name,
-                    color = when {
-                        name == selectedDevice && selectedDeviceError -> MaterialTheme.colors.error
-                        name == selectedDevice -> MaterialTheme.colors.secondary
-                        else -> MaterialTheme.colors.onSurface
-                    }
-                )
-            }
-            if (index != availableDeviceNames.lastIndex) {
-                Spacer(Modifier.size(8.dp))
+                }
             }
         }
+        AnimatedVisibility(visible = availableDeviceNames == null) {
+            DeviceListLoading()
+        }
+    }
+}
+
+@Composable
+private fun DeviceListLoading() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(40.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        LinearProgressIndicator(color = MaterialTheme.colors.onSurface)
     }
 }
 

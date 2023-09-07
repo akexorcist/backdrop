@@ -12,16 +12,14 @@ class MainViewModel(
     private val webcamRepository: WebcamRepository,
     private val audioRepository: AudioRepository,
 ) {
+    private val coroutineScope = CoroutineScope(Dispatchers.IO + Job())
     private val noSelectedVideo = Video(
         name = DeviceName.VIDEO_NONE,
-        selectedResolution = Video.Resolution(0, 0),
         availableResolutions = listOf(),
         fps = .0,
     )
 
     private val noSelectedAudio = Audio(name = DeviceName.VIDEO_NONE)
-
-    private val coroutineScope = CoroutineScope(Dispatchers.IO + Job())
     private val _uiState: MutableStateFlow<MainUiState> = MutableStateFlow(
         defaultMainUiState(
             selectedVideo = noSelectedVideo,
@@ -33,12 +31,11 @@ class MainViewModel(
 
     val availableImageData: StateFlow<ImageData?> = webcamRepository.collectAvailableImageData()
 
-    suspend fun observeVideoInput() {
+    suspend fun observeVideoInput() = coroutineScope.launch {
         webcamRepository.getAvailableWebcam().collectLatest { videos ->
             val newVideos = listOf(noSelectedVideo) + videos.map { webcam ->
                 Video(
                     name = webcam.name,
-                    selectedResolution = webcam.device.resolution.toResolution(),
                     availableResolutions = webcam.device.resolutions.map { it.toResolution() },
                     fps = webcam.fps,
                 )
@@ -51,7 +48,7 @@ class MainViewModel(
         }
     }
 
-    suspend fun observeAudioInput() {
+    suspend fun observeAudioInput() = coroutineScope.launch {
         audioRepository.getAvailableAudioInputs().collectLatest { audios ->
             val newAudios = listOf(noSelectedAudio) + audios.map { (_, info) ->
                 Audio(info.name)
@@ -64,7 +61,7 @@ class MainViewModel(
         }
     }
 
-    suspend fun observeAudioOutput() {
+    suspend fun observeAudioOutput() = coroutineScope.launch {
         audioRepository.getAvailableAudioOutputs().collectLatest { audios ->
             val newAudios = listOf(noSelectedAudio) + audios.map { (_, info) ->
                 Audio(info.name)
@@ -95,11 +92,6 @@ class MainViewModel(
             name = video.name,
             dimension = resolution.toDimension(),
         )
-        _uiState.update {
-            it.copy(
-                selectedVideo = it.selectedVideo?.copy(selectedResolution = resolution)
-            )
-        }
     }
 
     fun selectAudioInput(audio: Audio) = coroutineScope.launch {
@@ -126,7 +118,7 @@ class MainViewModel(
             it.copy(
                 selectedAudioInput = audio,
                 selectedAudioInputError = status == PlaybackStatus.AudioInputError,
-                selectedAudioOutputError = status == PlaybackStatus.AudioOutputError&& it.selectedAudioOutput?.name != DeviceName.AUDIO_NONE,
+                selectedAudioOutputError = status == PlaybackStatus.AudioOutputError && it.selectedAudioOutput?.name != DeviceName.AUDIO_NONE,
             )
         }
     }
