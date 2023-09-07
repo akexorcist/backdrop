@@ -2,16 +2,28 @@
 
 package com.akexorcist.screensharing.ui.main
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.*
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateIntAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.layout.ContentScale
@@ -20,6 +32,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.akexorcist.screensharing.config.DeviceName
 import com.akexorcist.screensharing.data.*
+import javafx.scene.paint.Material
+import kotlinx.coroutines.delay
 
 private val SectionWidth = 300.dp
 
@@ -59,6 +73,7 @@ private fun MainScreen(
     val availableVideo = uiState.availableVideos
     val availableAudioInputs = uiState.availableAudioInputs
     val availableAudioOutputs = uiState.availableAudioOutputs
+    var isMenuShowing by remember { mutableStateOf(true) }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -74,46 +89,122 @@ private fun MainScreen(
                 .fillMaxSize()
                 .padding(32.dp)
         ) {
-            // Webcam
-            Column(
-                modifier = Modifier.verticalScroll(rememberScrollState())
+            ToggleUiButton(
+                clickable = availableVideo != null &&
+                        availableAudioInputs != null &&
+                        availableAudioOutputs != null,
+                isShowing = isMenuShowing,
+                onClick = { isMenuShowing = !isMenuShowing },
+            )
+            Spacer(Modifier.size(16.dp))
+            AnimatedVisibility(
+                visible = isMenuShowing,
+                enter = fadeIn() + slideInVertically(initialOffsetY = { -25 }),
+                exit = fadeOut() + slideOutVertically(targetOffsetY = { -25 }),
             ) {
-                VideoChooser(
-                    selectedVideo = selectedVideo,
-                    availableVideos = availableVideo,
-                    onVideoSelect = onVideoSelect,
-                )
-                Spacer(Modifier.size(16.dp))
-                VideoStatusInformation(
-                    modifier = Modifier.width(SectionWidth),
-                    currentVideo = selectedVideo,
-                    availableImageData = availableImageData,
-                )
-                Spacer(Modifier.size(16.dp))
-                VideoResolutionInformation(
-                    modifier = Modifier.width(SectionWidth),
-                    video = selectedVideo,
-                    availableImageData = availableImageData,
-                    onResolutionSelect = onVideoResolutionSelect,
-                )
-            }
+                Row {
+                    // Webcam
+                    Column(
+                        modifier = Modifier.verticalScroll(rememberScrollState())
+                    ) {
+                        VideoChooser(
+                            selectedVideo = selectedVideo,
+                            availableVideos = availableVideo,
+                            onVideoSelect = onVideoSelect,
+                        )
+                        Spacer(Modifier.size(16.dp))
+                        VideoStatusInformation(
+                            modifier = Modifier.width(SectionWidth),
+                            currentVideo = selectedVideo,
+                            availableImageData = availableImageData,
+                        )
+                        Spacer(Modifier.size(16.dp))
+                        VideoResolutionInformation(
+                            modifier = Modifier.width(SectionWidth),
+                            video = selectedVideo,
+                            availableImageData = availableImageData,
+                            onResolutionSelect = onVideoResolutionSelect,
+                        )
+                    }
 
-            // Audio
-            Spacer(Modifier.size(16.dp))
-            AudioInputChooser(
-                selectedAudioInput = selectedAudioInput,
-                selectedAudioInputError = selectedAudioInputError,
-                availableAudioInputs = availableAudioInputs,
-                onAudioInputSelect = onAudioInputSelect,
-            )
-            Spacer(Modifier.size(16.dp))
-            AudioOutputChooser(
-                selectedAudioOutput = selectedAudioOutput,
-                selectedAudioOutputError = selectedAudioOutputError,
-                availableAudioOutputs = availableAudioOutputs,
-                onAudioOutputSelect = onAudioOutputSelect,
-            )
+                    // Audio
+                    Spacer(Modifier.size(16.dp))
+                    AudioInputChooser(
+                        selectedAudioInput = selectedAudioInput,
+                        selectedAudioInputError = selectedAudioInputError,
+                        availableAudioInputs = availableAudioInputs,
+                        onAudioInputSelect = onAudioInputSelect,
+                    )
+                    Spacer(Modifier.size(16.dp))
+                    AudioOutputChooser(
+                        selectedAudioOutput = selectedAudioOutput,
+                        selectedAudioOutputError = selectedAudioOutputError,
+                        availableAudioOutputs = availableAudioOutputs,
+                        onAudioOutputSelect = onAudioOutputSelect,
+                    )
+                }
+            }
         }
+    }
+}
+
+@Composable
+private fun ToggleUiButton(
+    clickable: Boolean,
+    isShowing: Boolean,
+    onClick: () -> Unit,
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
+    var isHiding by remember { mutableStateOf(false) }
+
+    val animatedIconRotate by animateFloatAsState(
+        targetValue = if (isShowing) 0f else 180f,
+        animationSpec = tween(durationMillis = 300)
+    )
+    val animatedButtonAlpha by animateFloatAsState(
+        targetValue = if (isHiding) 0f else 1f,
+        animationSpec = tween(
+            durationMillis = 300,
+            easing = LinearEasing,
+        )
+    )
+    LaunchedEffect(isShowing, isHovered) {
+        if (isShowing) return@LaunchedEffect
+        isHiding = if (isHovered) {
+            false
+        } else {
+            delay(3000L)
+            true
+        }
+    }
+    Button(
+        modifier = Modifier
+            .size(48.dp)
+            .alpha(animatedButtonAlpha),
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = MaterialTheme.colors.surface.copy(alpha = 0.25f),
+            contentColor = MaterialTheme.colors.onSurface,
+            disabledBackgroundColor = MaterialTheme.colors.surface.copy(alpha = 0.05f),
+            disabledContentColor = MaterialTheme.colors.onSurface.copy(alpha = 0.25f),
+        ),
+        elevation = ButtonDefaults.elevation(
+            defaultElevation = 0.dp,
+            pressedElevation = 0.dp,
+            disabledElevation = 0.dp,
+            hoveredElevation = 0.dp,
+            focusedElevation = 0.dp,
+        ),
+        shape = RoundedCornerShape(16.dp),
+        enabled = clickable,
+        interactionSource = interactionSource,
+        onClick = onClick,
+    ) {
+        Icon(
+            modifier = Modifier.rotate(animatedIconRotate),
+            imageVector = Icons.Default.ArrowBack,
+            contentDescription = "Toggle UI display",
+        )
     }
 }
 
