@@ -72,10 +72,10 @@ class DefaultAudioRepository : AudioRepository {
     override fun startAudioPlayback(): PlaybackStatus {
         val inputMixer = this.inputMixer ?: return PlaybackStatus.AudioInputError
         val outputMixer = this.outputMixer ?: return PlaybackStatus.AudioOutputError
-        val targetDataLine =
-            getSupportedLine(inputMixer, TargetDataLine::class.java) ?: return PlaybackStatus.AudioInputError
-        val sourceDataLine =
-            getSupportedLine(outputMixer, SourceDataLine::class.java) ?: return PlaybackStatus.AudioOutputError
+        val targetDataLine = getSupportedLine(inputMixer, TargetDataLine::class.java)
+            ?: return PlaybackStatus.AudioInputError
+        val sourceDataLine = getSupportedLine(outputMixer, SourceDataLine::class.java)
+            ?: return PlaybackStatus.AudioOutputError
         targetDataLine.apply {
             open()
             start()
