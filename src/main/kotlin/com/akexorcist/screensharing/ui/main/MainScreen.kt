@@ -15,16 +15,17 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -35,18 +36,28 @@ import kotlinx.coroutines.delay
 private val SectionWidth = 300.dp
 
 @Composable
-fun MainRoute(mainViewModel: MainViewModel) {
+fun MainRoute(
+    mainViewModel: MainViewModel,
+    isFullScreen: Boolean,
+    onMaximizeWindowClick: () -> Unit,
+    onMinimizeWindowClick: () -> Unit,
+    onCloseAppClick: () -> Unit,
+) {
     val uiState by mainViewModel.uiState.collectAsState()
     val availableImageData by mainViewModel.availableImageData.collectAsState()
     MainScreen(
         uiState = uiState,
         availableImageData = availableImageData,
+        isFullScreen = isFullScreen,
         onVideoSelect = { mainViewModel.selectVideo(it) },
         onVideoResolutionSelect = { video, resolution ->
             mainViewModel.setVideoResolution(video, resolution)
         },
         onAudioInputSelect = { mainViewModel.selectAudioInput(it) },
         onAudioOutputSelect = { mainViewModel.selectAudioOutput(it) },
+        onMaximizeWindowClick = onMaximizeWindowClick,
+        onMinimizeWindowClick = onMinimizeWindowClick,
+        onCloseAppClick = onCloseAppClick,
     )
     LaunchedEffect(Unit) { mainViewModel.observeVideoInput() }
     LaunchedEffect(Unit) { mainViewModel.observeAudioInput() }
@@ -57,10 +68,14 @@ fun MainRoute(mainViewModel: MainViewModel) {
 private fun MainScreen(
     uiState: MainUiState,
     availableImageData: ImageData?,
+    isFullScreen: Boolean,
     onVideoSelect: (Video) -> Unit,
     onVideoResolutionSelect: (Video, Video.Resolution) -> Unit,
     onAudioInputSelect: (Audio) -> Unit,
     onAudioOutputSelect: (Audio) -> Unit,
+    onMaximizeWindowClick: () -> Unit,
+    onMinimizeWindowClick: () -> Unit,
+    onCloseAppClick: () -> Unit,
 ) {
     val selectedVideo = uiState.selectedVideo
     val selectedAudioInput = uiState.selectedAudioInput
@@ -70,7 +85,20 @@ private fun MainScreen(
     val availableVideo = uiState.availableVideos
     val availableAudioInputs = uiState.availableAudioInputs
     val availableAudioOutputs = uiState.availableAudioOutputs
-    var isMenuShowing by remember { mutableStateOf(true) }
+    var isConsoleShowing by remember { mutableStateOf(true) }
+    var isHiding by remember { mutableStateOf(false) }
+    var isInvisibleHovered by remember { mutableStateOf(false) }
+
+    LaunchedEffect(isConsoleShowing, isInvisibleHovered) {
+        if (isConsoleShowing) return@LaunchedEffect
+        isHiding = if (isInvisibleHovered) {
+            false
+        } else {
+            delay(3000L)
+            true
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -86,16 +114,36 @@ private fun MainScreen(
                 .fillMaxSize()
                 .padding(32.dp)
         ) {
-            ToggleUiButton(
-                clickable = availableVideo != null &&
-                        availableAudioInputs != null &&
-                        availableAudioOutputs != null,
-                isShowing = isMenuShowing,
-                onClick = { isMenuShowing = !isMenuShowing },
-            )
+            Column {
+                CloseButton(
+                    isHiding = isHiding,
+                    onInvisibleHovered = { isInvisibleHovered = it },
+                    onClick = onCloseAppClick,
+                )
+                Spacer(Modifier.size(16.dp))
+                FullscreenButton(
+                    isFullScreen = isFullScreen,
+                    isHiding = isHiding,
+                    onInvisibleHovered = { isInvisibleHovered = it },
+                    onClick = when (isFullScreen) {
+                        true -> onMinimizeWindowClick
+                        false -> onMaximizeWindowClick
+                    },
+                )
+                Spacer(Modifier.size(16.dp))
+                ToggleUiButton(
+                    clickable = availableVideo != null &&
+                            availableAudioInputs != null &&
+                            availableAudioOutputs != null,
+                    isHiding = isHiding,
+                    isConsoleShowing = isConsoleShowing,
+                    onInvisibleHovered = { isInvisibleHovered = it },
+                    onClick = { isConsoleShowing = !isConsoleShowing },
+                )
+            }
             Spacer(Modifier.size(16.dp))
             AnimatedVisibility(
-                visible = isMenuShowing,
+                visible = isConsoleShowing,
                 enter = fadeIn() + slideInVertically(initialOffsetY = { -25 }),
                 exit = fadeOut() + slideOutVertically(targetOffsetY = { -25 }),
             ) {
@@ -148,15 +196,19 @@ private fun MainScreen(
 @Composable
 private fun ToggleUiButton(
     clickable: Boolean,
-    isShowing: Boolean,
+    isHiding: Boolean,
+    isConsoleShowing: Boolean,
+    onInvisibleHovered: (Boolean) -> Unit,
     onClick: () -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
-    var isHiding by remember { mutableStateOf(false) }
+    LaunchedEffect(isHovered) {
+        onInvisibleHovered(isHovered)
+    }
 
     val animatedIconRotate by animateFloatAsState(
-        targetValue = if (isShowing) 0f else 180f,
+        targetValue = if (isConsoleShowing) 0f else 180f,
         animationSpec = tween(durationMillis = 300)
     )
     val animatedButtonAlpha by animateFloatAsState(
@@ -166,19 +218,105 @@ private fun ToggleUiButton(
             easing = LinearEasing,
         )
     )
-    LaunchedEffect(isShowing, isHovered) {
-        if (isShowing) return@LaunchedEffect
-        isHiding = if (isHovered) {
-            false
-        } else {
-            delay(3000L)
-            true
-        }
+    IconButton(
+        modifier = Modifier.alpha(animatedButtonAlpha),
+        interactionSource = interactionSource,
+        enabled = clickable,
+        onClick = onClick,
+    ) {
+        Icon(
+            modifier = Modifier.rotate(animatedIconRotate),
+            imageVector = Icons.Default.ArrowBack,
+            contentDescription = "Toggle UI display",
+        )
     }
+}
+
+@Composable
+private fun CloseButton(
+    isHiding: Boolean,
+    onInvisibleHovered: (Boolean) -> Unit,
+    onClick: () -> Unit,
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
+
+    LaunchedEffect(isHovered) {
+        onInvisibleHovered(isHovered)
+    }
+    val animatedButtonAlpha by animateFloatAsState(
+        targetValue = if (isHiding) 0f else 1f,
+        animationSpec = tween(
+            durationMillis = 300,
+            easing = LinearEasing,
+        )
+    )
+
+    IconButton(
+        modifier = Modifier.alpha(animatedButtonAlpha),
+        interactionSource = interactionSource,
+        enabled = true,
+        onClick = onClick,
+    ) {
+        Icon(
+            imageVector = Icons.Default.Close,
+            contentDescription = "Close the app",
+        )
+    }
+}
+
+@Composable
+private fun FullscreenButton(
+    isFullScreen: Boolean,
+    isHiding: Boolean,
+    onInvisibleHovered: (Boolean) -> Unit,
+    onClick: () -> Unit,
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
+
+    LaunchedEffect(isHovered) {
+        onInvisibleHovered(isHovered)
+    }
+    val animatedButtonAlpha by animateFloatAsState(
+        targetValue = if (isHiding) 0f else 1f,
+        animationSpec = tween(
+            durationMillis = 300,
+            easing = LinearEasing,
+        )
+    )
+
+    IconButton(
+        modifier = Modifier.alpha(animatedButtonAlpha),
+        interactionSource = interactionSource,
+        enabled = true,
+        onClick = onClick,
+    ) {
+        Icon(
+            painter = painterResource(
+                when (isFullScreen) {
+                    true -> "ic_exit_fullscreen.svg"
+                    false -> "ic_enter_fullscreen.svg"
+                }
+            ),
+            contentDescription = when (isFullScreen) {
+                true -> "Exit from fullscreen"
+                false -> "Enter to fullscreen"
+            },
+        )
+    }
+}
+
+@Composable
+private fun IconButton(
+    modifier: Modifier = Modifier,
+    interactionSource: MutableInteractionSource,
+    enabled: Boolean,
+    onClick: () -> Unit,
+    content: @Composable () -> Unit
+) {
     Button(
-        modifier = Modifier
-            .size(48.dp)
-            .alpha(animatedButtonAlpha),
+        modifier = Modifier.size(48.dp).then(modifier),
         colors = ButtonDefaults.buttonColors(
             backgroundColor = MaterialTheme.colors.surface.copy(alpha = 0.7f),
             contentColor = MaterialTheme.colors.onSurface,
@@ -192,16 +330,12 @@ private fun ToggleUiButton(
             hoveredElevation = 0.dp,
             focusedElevation = 0.dp,
         ),
+        enabled = enabled,
         shape = RoundedCornerShape(16.dp),
-        enabled = clickable,
         interactionSource = interactionSource,
         onClick = onClick,
     ) {
-        Icon(
-            modifier = Modifier.rotate(animatedIconRotate),
-            imageVector = Icons.Default.ArrowBack,
-            contentDescription = "Toggle UI display",
-        )
+        content()
     }
 }
 

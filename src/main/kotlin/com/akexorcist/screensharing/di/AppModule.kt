@@ -11,6 +11,6 @@ object AppModule {
     val modules = module {
         single<VideoRepository> { DefaultVideoRepository() }
         single<AudioRepository> { DefaultAudioRepository() }
-        factory { MainViewModel(get(), get()) }
+        single { MainViewModel(get(), get()) }
     }
 }

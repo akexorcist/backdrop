@@ -27,24 +27,41 @@ import org.koin.java.KoinJavaComponent.get
 fun main() = application {
     Webcam.setDriver(NativeDriver())
     startKoin { modules(AppModule.modules) }
+    val windowState = rememberWindowState(
+        position = WindowPosition.Aligned(Alignment.Center),
+        size = DpSize(1280.dp, 720.dp),
+    )
     Window(
         title = "Screen Sharing",
-        state = rememberWindowState(
-            position = WindowPosition.Aligned(Alignment.Center),
-            size = DpSize(1280.dp, 720.dp),
-        ),
+        state = windowState,
         undecorated = true,
         onCloseRequest = ::exitApplication,
     ) {
         MaterialTheme(colors = defaultColors) {
             WindowDraggableArea {
-                App()
+                App(
+                    isFullScreen = windowState.placement == WindowPlacement.Fullscreen,
+                    onMaximizeWindowClick = { windowState.placement = WindowPlacement.Fullscreen },
+                    onMinimizeWindowClick = { windowState.placement = WindowPlacement.Floating },
+                    onCloseAppClick = { exitApplication() },
+                )
             }
         }
     }
 }
 
 @Composable
-fun App() {
-    MainRoute(mainViewModel = get(MainViewModel::class.java))
+fun App(
+    isFullScreen: Boolean,
+    onMaximizeWindowClick: () -> Unit,
+    onMinimizeWindowClick: () -> Unit,
+    onCloseAppClick: () -> Unit,
+) {
+    MainRoute(
+        mainViewModel = get(MainViewModel::class.java),
+        isFullScreen = isFullScreen,
+        onMaximizeWindowClick = onMaximizeWindowClick,
+        onMinimizeWindowClick = onMinimizeWindowClick,
+        onCloseAppClick = onCloseAppClick,
+    )
 }
