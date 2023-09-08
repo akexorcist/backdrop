@@ -183,9 +183,9 @@ private fun ToggleUiButton(
             .size(48.dp)
             .alpha(animatedButtonAlpha),
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = MaterialTheme.colors.surface.copy(alpha = 0.25f),
+            backgroundColor = Color.Black.copy(alpha = 0.4f),
             contentColor = MaterialTheme.colors.onSurface,
-            disabledBackgroundColor = MaterialTheme.colors.surface.copy(alpha = 0.05f),
+            disabledBackgroundColor = Color.Black.copy(alpha = 0.125f),
             disabledContentColor = MaterialTheme.colors.onSurface.copy(alpha = 0.25f),
         ),
         elevation = ButtonDefaults.elevation(
@@ -478,6 +478,6 @@ private fun DeviceListLoading() {
 
 @Composable
 private fun Modifier.surfaceBackground() = this.background(
-    color = MaterialTheme.colors.surface.copy(alpha = 0.25f),
+    color = Color.Black.copy(alpha = 0.4f),
     shape = RoundedCornerShape(16.dp),
 ).padding(horizontal = 8.dp, vertical = 16.dp)
