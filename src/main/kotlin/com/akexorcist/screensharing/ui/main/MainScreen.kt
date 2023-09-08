@@ -5,7 +5,6 @@ package com.akexorcist.screensharing.ui.main
 import androidx.compose.animation.*
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -16,7 +15,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,7 +30,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.akexorcist.screensharing.config.DeviceName
 import com.akexorcist.screensharing.data.*
-import javafx.scene.paint.Material
 import kotlinx.coroutines.delay
 
 private val SectionWidth = 300.dp
@@ -183,10 +180,10 @@ private fun ToggleUiButton(
             .size(48.dp)
             .alpha(animatedButtonAlpha),
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = Color.Black.copy(alpha = 0.4f),
+            backgroundColor = MaterialTheme.colors.surface.copy(alpha = 0.7f),
             contentColor = MaterialTheme.colors.onSurface,
-            disabledBackgroundColor = Color.Black.copy(alpha = 0.125f),
-            disabledContentColor = MaterialTheme.colors.onSurface.copy(alpha = 0.25f),
+            disabledBackgroundColor = MaterialTheme.colors.surface.copy(alpha = 0.125f),
+            disabledContentColor = MaterialTheme.colors.onSurface.copy(alpha = 0.125f),
         ),
         elevation = ButtonDefaults.elevation(
             defaultElevation = 0.dp,
@@ -478,6 +475,6 @@ private fun DeviceListLoading() {
 
 @Composable
 private fun Modifier.surfaceBackground() = this.background(
-    color = Color.Black.copy(alpha = 0.4f),
+    color = MaterialTheme.colors.surface.copy(alpha = 0.7f),
     shape = RoundedCornerShape(16.dp),
 ).padding(horizontal = 8.dp, vertical = 16.dp)
