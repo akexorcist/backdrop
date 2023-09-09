@@ -21,6 +21,19 @@ Video and audio projection app for your streaming content on macOS
 5. Audio input picker
 6. Audio output picker
 
+## Build an app from source code
+Prerequisite
+* JDK 17
+* Terminal or alternative CLI Tools
+
+```
+git clone https://github.com/akexorcist/backdrop.git
+cd backdrop
+./gradlew createDistributable
+```
+
+Then the `Backdrop.app` will be in `<project>/build/compose/binaries/main/app`
+
 ## Powered by
 * [Compose Multiplatform](https://www.jetbrains.com/lp/compose-multiplatform/)
 * [Material 3](https://m3.material.io/)
