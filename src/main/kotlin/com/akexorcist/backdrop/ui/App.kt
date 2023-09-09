@@ -29,7 +29,10 @@ fun main() = application {
         position = WindowPosition.Aligned(Alignment.Center),
         size = DpSize(1280.dp, 720.dp),
     )
-    val coroutineScope = rememberCoroutineScope()
+    val appState = rememberBackdropAppState(
+        windowState = windowState,
+        applicationScope = this,
+    )
     Window(
         title = StringResource.appName,
         state = windowState,
@@ -38,18 +41,7 @@ fun main() = application {
     ) {
         MaterialTheme(colors = defaultColors) {
             WindowDraggableArea {
-                App(
-                    isFullScreen = windowState.placement == WindowPlacement.Fullscreen || windowState.placement == WindowPlacement.Maximized,
-                    onMaximizeWindowClick = {
-                        coroutineScope.launch {
-                            windowState.placement = WindowPlacement.Fullscreen
-                            delay(1000)
-                            windowState.placement = WindowPlacement.Maximized
-                        }
-                    },
-                    onMinimizeWindowClick = { windowState.placement = WindowPlacement.Floating },
-                    onCloseAppClick = { exitApplication() },
-                )
+                App(appState = appState)
             }
         }
     }
@@ -57,16 +49,10 @@ fun main() = application {
 
 @Composable
 fun App(
-    isFullScreen: Boolean,
-    onMaximizeWindowClick: () -> Unit,
-    onMinimizeWindowClick: () -> Unit,
-    onCloseAppClick: () -> Unit,
+    appState: BackdropAppState,
 ) {
     MainRoute(
+        appState = appState,
         mainViewModel = get(MainViewModel::class.java),
-        isFullScreen = isFullScreen,
-        onMaximizeWindowClick = onMaximizeWindowClick,
-        onMinimizeWindowClick = onMinimizeWindowClick,
-        onCloseAppClick = onCloseAppClick,
     )
 }

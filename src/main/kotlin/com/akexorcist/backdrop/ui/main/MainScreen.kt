@@ -32,50 +32,91 @@ import androidx.compose.ui.unit.dp
 import com.akexorcist.backdrop.config.DeviceName
 import com.akexorcist.backdrop.data.*
 import com.akexorcist.backdrop.resource.StringResource
+import com.akexorcist.backdrop.ui.BackdropAppState
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 private val SectionWidth = 300.dp
 
 @Composable
 fun MainRoute(
+    appState: BackdropAppState,
     mainViewModel: MainViewModel,
-    isFullScreen: Boolean,
-    onMaximizeWindowClick: () -> Unit,
-    onMinimizeWindowClick: () -> Unit,
-    onCloseAppClick: () -> Unit,
 ) {
     val uiState by mainViewModel.uiState.collectAsState()
     val availableImageData by mainViewModel.availableImageData.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
+
+    var isDeviceConsoleShowing by remember { mutableStateOf(true) }
+    var isMenuHiding by remember { mutableStateOf(false) }
+    var isHidingMenuHovered by remember { mutableStateOf(false) }
+
     MainScreen(
         uiState = uiState,
         availableImageData = availableImageData,
-        isFullScreen = isFullScreen,
+        isDeviceConsoleShowing = isDeviceConsoleShowing,
+        isMenuHiding = isMenuHiding,
+        isFullScreen = appState.isFullscreen(),
         onVideoSelect = { mainViewModel.selectVideo(it) },
-        onVideoResolutionSelect = { video, resolution ->
-            mainViewModel.setVideoResolution(video, resolution)
-        },
+        onVideoResolutionSelect = { video, resolution -> mainViewModel.setVideoResolution(video, resolution) },
         onAudioInputSelect = { mainViewModel.selectAudioInput(it) },
         onAudioOutputSelect = { mainViewModel.selectAudioOutput(it) },
-        onMaximizeWindowClick = onMaximizeWindowClick,
-        onMinimizeWindowClick = onMinimizeWindowClick,
-        onCloseAppClick = onCloseAppClick,
+        onHidingMenuHovered = { isHidingMenuHovered = it },
+        onToggleConsoleUiClick = { isDeviceConsoleShowing = !isDeviceConsoleShowing },
+        onEnterFullscreen = { coroutineScope.launch { appState.enterFullScreen() } },
+        onExitFullscreenClick = { appState.exitFullScreen() },
+        onCloseAppClick = { appState.exitApplication() },
     )
-    LaunchedEffect(Unit) { mainViewModel.observeVideoInput() }
-    LaunchedEffect(Unit) { mainViewModel.observeAudioInput() }
-    LaunchedEffect(Unit) { mainViewModel.observeAudioOutput() }
+
+    AutoMenuHidingLaunchedEffect(isDeviceConsoleShowing, isHidingMenuHovered) {
+        isMenuHiding = it
+    }
+    LaunchedEffect(Unit) {
+        delay(50)
+        mainViewModel.observeVideoInput()
+    }
+    LaunchedEffect(Unit) {
+        delay(50)
+        mainViewModel.observeAudioInput()
+    }
+    LaunchedEffect(Unit) {
+        delay(50)
+        mainViewModel.observeAudioOutput()
+    }
+}
+
+@Composable
+private fun AutoMenuHidingLaunchedEffect(
+    isDeviceConsoleShowing: Boolean,
+    isHidingMenuHovered: Boolean,
+    onMenuHidingChange: (Boolean) -> Unit
+) {
+    LaunchedEffect(isDeviceConsoleShowing, isHidingMenuHovered) {
+        if (isDeviceConsoleShowing) return@LaunchedEffect
+        if (isHidingMenuHovered) {
+            onMenuHidingChange(false)
+        } else {
+            delay(3000L)
+            onMenuHidingChange(true)
+        }
+    }
 }
 
 @Composable
 private fun MainScreen(
     uiState: MainUiState,
     availableImageData: ImageData?,
+    isDeviceConsoleShowing: Boolean,
+    isMenuHiding: Boolean,
     isFullScreen: Boolean,
     onVideoSelect: (Video) -> Unit,
     onVideoResolutionSelect: (Video, Video.Resolution) -> Unit,
     onAudioInputSelect: (Audio) -> Unit,
     onAudioOutputSelect: (Audio) -> Unit,
-    onMaximizeWindowClick: () -> Unit,
-    onMinimizeWindowClick: () -> Unit,
+    onHidingMenuHovered: (Boolean) -> Unit,
+    onToggleConsoleUiClick: () -> Unit,
+    onEnterFullscreen: () -> Unit,
+    onExitFullscreenClick: () -> Unit,
     onCloseAppClick: () -> Unit,
 ) {
     val selectedVideo = uiState.selectedVideo
@@ -86,19 +127,9 @@ private fun MainScreen(
     val availableVideo = uiState.availableVideos
     val availableAudioInputs = uiState.availableAudioInputs
     val availableAudioOutputs = uiState.availableAudioOutputs
-    var isConsoleShowing by remember { mutableStateOf(true) }
-    var isHiding by remember { mutableStateOf(false) }
-    var isInvisibleHovered by remember { mutableStateOf(false) }
-
-    LaunchedEffect(isConsoleShowing, isInvisibleHovered) {
-        if (isConsoleShowing) return@LaunchedEffect
-        isHiding = if (isInvisibleHovered) {
-            false
-        } else {
-            delay(3000L)
-            true
-        }
-    }
+    val isToggleConsoleUiClickable = availableVideo != null &&
+            availableAudioInputs != null &&
+            availableAudioOutputs != null
 
     Box(
         modifier = Modifier
@@ -115,36 +146,20 @@ private fun MainScreen(
                 .fillMaxSize()
                 .padding(32.dp)
         ) {
-            Column {
-                CloseButton(
-                    isHiding = isHiding,
-                    onInvisibleHovered = { isInvisibleHovered = it },
-                    onClick = onCloseAppClick,
-                )
-                Spacer(Modifier.size(16.dp))
-                FullscreenButton(
-                    isFullScreen = isFullScreen,
-                    isHiding = isHiding,
-                    onInvisibleHovered = { isInvisibleHovered = it },
-                    onClick = when (isFullScreen) {
-                        true -> onMinimizeWindowClick
-                        false -> onMaximizeWindowClick
-                    },
-                )
-                Spacer(Modifier.size(16.dp))
-                ToggleUiButton(
-                    clickable = availableVideo != null &&
-                            availableAudioInputs != null &&
-                            availableAudioOutputs != null,
-                    isHiding = isHiding,
-                    isConsoleShowing = isConsoleShowing,
-                    onInvisibleHovered = { isInvisibleHovered = it },
-                    onClick = { isConsoleShowing = !isConsoleShowing },
-                )
-            }
+            MenuButtonContainer(
+                isFullScreen = isFullScreen,
+                isToggleConsoleUiClickable = isToggleConsoleUiClickable,
+                isDeviceConsoleShowing = isDeviceConsoleShowing,
+                isMenuHiding = isMenuHiding,
+                onHidingMenuHovered = onHidingMenuHovered,
+                onToggleConsoleUiClick = onToggleConsoleUiClick,
+                onEnterFullscreen = onEnterFullscreen,
+                onExitFullscreenClick = onExitFullscreenClick,
+                onCloseAppClick = onCloseAppClick,
+            )
             Spacer(Modifier.size(16.dp))
             AnimatedVisibility(
-                visible = isConsoleShowing,
+                visible = isDeviceConsoleShowing,
                 enter = fadeIn() + slideInVertically(initialOffsetY = { -25 }),
                 exit = fadeOut() + slideOutVertically(targetOffsetY = { -25 }),
             ) {
@@ -195,25 +210,64 @@ private fun MainScreen(
 }
 
 @Composable
+private fun MenuButtonContainer(
+    isFullScreen: Boolean,
+    isToggleConsoleUiClickable: Boolean,
+    isDeviceConsoleShowing: Boolean,
+    isMenuHiding: Boolean,
+    onHidingMenuHovered: (Boolean) -> Unit,
+    onToggleConsoleUiClick: () -> Unit,
+    onEnterFullscreen: () -> Unit,
+    onExitFullscreenClick: () -> Unit,
+    onCloseAppClick: () -> Unit,
+) {
+    Column {
+        CloseButton(
+            isHiding = isMenuHiding,
+            onHidingMenuHovered = onHidingMenuHovered,
+            onClick = onCloseAppClick,
+        )
+        Spacer(Modifier.size(16.dp))
+        FullscreenButton(
+            isFullScreen = isFullScreen,
+            isHiding = isMenuHiding,
+            onHidingMenuHovered = onHidingMenuHovered,
+            onClick = when (isFullScreen) {
+                true -> onExitFullscreenClick
+                false -> onEnterFullscreen
+            },
+        )
+        Spacer(Modifier.size(16.dp))
+        ToggleUiButton(
+            clickable = isToggleConsoleUiClickable,
+            isMenuHiding = isMenuHiding,
+            isDeviceConsoleShowing = isDeviceConsoleShowing,
+            onHidingMenuHovered = onHidingMenuHovered,
+            onClick = onToggleConsoleUiClick,
+        )
+    }
+}
+
+@Composable
 private fun ToggleUiButton(
     clickable: Boolean,
-    isHiding: Boolean,
-    isConsoleShowing: Boolean,
-    onInvisibleHovered: (Boolean) -> Unit,
+    isMenuHiding: Boolean,
+    isDeviceConsoleShowing: Boolean,
+    onHidingMenuHovered: (Boolean) -> Unit,
     onClick: () -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
     LaunchedEffect(isHovered) {
-        onInvisibleHovered(isHovered)
+        onHidingMenuHovered(isHovered)
     }
 
     val animatedIconRotate by animateFloatAsState(
-        targetValue = if (isConsoleShowing) 0f else 180f,
+        targetValue = if (isDeviceConsoleShowing) 0f else 180f,
         animationSpec = tween(durationMillis = 300)
     )
     val animatedButtonAlpha by animateFloatAsState(
-        targetValue = if (isHiding) 0f else 1f,
+        targetValue = if (isMenuHiding) 0f else 1f,
         animationSpec = tween(
             durationMillis = 300,
             easing = LinearEasing,
@@ -236,14 +290,14 @@ private fun ToggleUiButton(
 @Composable
 private fun CloseButton(
     isHiding: Boolean,
-    onInvisibleHovered: (Boolean) -> Unit,
+    onHidingMenuHovered: (Boolean) -> Unit,
     onClick: () -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
 
     LaunchedEffect(isHovered) {
-        onInvisibleHovered(isHovered)
+        onHidingMenuHovered(isHovered)
     }
     val animatedButtonAlpha by animateFloatAsState(
         targetValue = if (isHiding) 0f else 1f,
@@ -270,14 +324,14 @@ private fun CloseButton(
 private fun FullscreenButton(
     isFullScreen: Boolean,
     isHiding: Boolean,
-    onInvisibleHovered: (Boolean) -> Unit,
+    onHidingMenuHovered: (Boolean) -> Unit,
     onClick: () -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
 
     LaunchedEffect(isHovered) {
-        onInvisibleHovered(isHovered)
+        onHidingMenuHovered(isHovered)
     }
     val animatedButtonAlpha by animateFloatAsState(
         targetValue = if (isHiding) 0f else 1f,
