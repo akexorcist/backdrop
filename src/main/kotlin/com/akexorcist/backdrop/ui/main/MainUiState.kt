@@ -1,4 +1,4 @@
-package com.akexorcist.screensharing.ui.main
+package com.akexorcist.backdrop.ui.main
 
 import java.awt.Dimension
 

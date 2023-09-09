@@ -1,4 +1,4 @@
-package com.akexorcist.screensharing.ui.theme
+package com.akexorcist.backdrop.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

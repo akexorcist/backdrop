@@ -1,4 +1,4 @@
-package com.akexorcist.screensharing.config
+package com.akexorcist.backdrop.config
 
 object DeviceName {
     const val VIDEO_NONE = "None"

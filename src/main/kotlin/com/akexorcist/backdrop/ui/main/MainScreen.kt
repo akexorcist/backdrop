@@ -1,6 +1,6 @@
 @file:Suppress("FunctionName")
 
-package com.akexorcist.screensharing.ui.main
+package com.akexorcist.backdrop.ui.main
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.LinearEasing
@@ -29,8 +29,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.akexorcist.screensharing.config.DeviceName
-import com.akexorcist.screensharing.data.*
+import com.akexorcist.backdrop.config.DeviceName
+import com.akexorcist.backdrop.data.*
 import kotlinx.coroutines.delay
 
 private val SectionWidth = 300.dp

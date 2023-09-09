@@ -1,4 +1,4 @@
-package com.akexorcist.screensharing.data
+package com.akexorcist.backdrop.data
 
 sealed class PlaybackStatus {
     object Playing : PlaybackStatus()

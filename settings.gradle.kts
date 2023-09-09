@@ -10,4 +10,4 @@ pluginManagement {
     }
 }
 
-rootProject.name = "ScreenSharing"
+rootProject.name = "Backdrop"

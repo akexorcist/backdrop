@@ -1,6 +1,6 @@
 @file:Suppress("FunctionName")
 
-package com.akexorcist.screensharing.ui
+package com.akexorcist.backdrop.ui
 
 import androidx.compose.foundation.window.WindowDraggableArea
 import androidx.compose.material.MaterialTheme
@@ -10,10 +10,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.*
-import com.akexorcist.screensharing.di.AppModule
-import com.akexorcist.screensharing.ui.main.MainRoute
-import com.akexorcist.screensharing.ui.main.MainViewModel
-import com.akexorcist.screensharing.ui.theme.defaultColors
+import com.akexorcist.backdrop.di.AppModule
+import com.akexorcist.backdrop.ui.main.MainRoute
+import com.akexorcist.backdrop.ui.main.MainViewModel
+import com.akexorcist.backdrop.ui.theme.defaultColors
 import com.github.eduramiba.webcamcapture.drivers.NativeDriver
 import com.github.sarxos.webcam.Webcam
 import kotlinx.coroutines.delay
@@ -30,7 +30,7 @@ fun main() = application {
     )
     val coroutineScope = rememberCoroutineScope()
     Window(
-        title = "Screen Sharing",
+        title = "Backdrop",
         state = windowState,
         undecorated = true,
         onCloseRequest = ::exitApplication,

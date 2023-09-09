@@ -1,4 +1,4 @@
-package com.akexorcist.screensharing.data
+package com.akexorcist.backdrop.data
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
@@ -79,6 +79,8 @@ class DefaultAudioRepository : AudioRepository {
             open()
             start()
         }
+
+        println("Volume Control ${inputMixer.isControlSupported(FloatControl.Type.MASTER_GAIN)}")
         sourceDataLine.apply {
             open()
             start()

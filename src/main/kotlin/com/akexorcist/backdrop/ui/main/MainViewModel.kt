@@ -1,10 +1,10 @@
-package com.akexorcist.screensharing.ui.main
+package com.akexorcist.backdrop.ui.main
 
-import com.akexorcist.screensharing.config.DeviceName
-import com.akexorcist.screensharing.data.AudioRepository
-import com.akexorcist.screensharing.data.ImageData
-import com.akexorcist.screensharing.data.PlaybackStatus
-import com.akexorcist.screensharing.data.VideoRepository
+import com.akexorcist.backdrop.config.DeviceName
+import com.akexorcist.backdrop.data.AudioRepository
+import com.akexorcist.backdrop.data.ImageData
+import com.akexorcist.backdrop.data.PlaybackStatus
+import com.akexorcist.backdrop.data.VideoRepository
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 

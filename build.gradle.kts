@@ -6,7 +6,7 @@ plugins {
     id("org.openjfx.javafxplugin") version "0.0.13"
 }
 
-group = "com.akexorcist.screensharing"
+group = "com.akexorcist.backdrop"
 version = "1.0-SNAPSHOT"
 
 repositories {
@@ -25,7 +25,7 @@ dependencies {
 
 compose.desktop {
     application {
-        mainClass = "com.akexorcist.screensharing.ui.AppKt"
+        mainClass = "com.akexorcist.backdrop.ui.AppKt"
 
         nativeDistributions {
             targetFormats(
@@ -33,7 +33,7 @@ compose.desktop {
 //                TargetFormat.Msi,
 //                TargetFormat.Deb,
             )
-            packageName = "ScreenSharing"
+            packageName = "Backdrop"
             packageVersion = "1.0.0"
         }
     }

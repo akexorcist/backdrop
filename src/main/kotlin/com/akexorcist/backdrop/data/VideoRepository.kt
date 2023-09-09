@@ -1,4 +1,4 @@
-package com.akexorcist.screensharing.data
+package com.akexorcist.backdrop.data
 
 import com.github.sarxos.webcam.*
 import kotlinx.coroutines.channels.awaitClose
