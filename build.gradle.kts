@@ -33,13 +33,29 @@ compose.desktop {
 //                TargetFormat.Msi,
 //                TargetFormat.Deb,
             )
-            packageName = "Backdrop"
-            packageVersion = "1.0.0"
+
             macOS {
                 iconFile.set(project.file("icon.icns"))
             }
+
+            packageName = "Backdrop"
+            packageVersion = "1.0.0"
+            description = "Video and audio projection for your streaming content"
+            licenseFile.set(project.file("LICENSE.txt"))
+        }
+
+        buildTypes {
+            release {
+                proguard {
+                    configurationFiles.from("proguard-rules.pro")
+                }
+            }
         }
     }
+}
+
+kotlin {
+    jvmToolchain(17)
 }
 
 javafx {
