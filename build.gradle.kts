@@ -31,7 +31,6 @@ compose.desktop {
             targetFormats(
                 TargetFormat.Dmg,
 //                TargetFormat.Msi,
-//                TargetFormat.Deb,
             )
 
             macOS {
@@ -40,7 +39,7 @@ compose.desktop {
 
             packageName = "Backdrop"
             packageVersion = "1.0.0"
-            description = "Video and audio projection for your streaming content"
+            description = "Video and audio projection app for your streaming content"
             licenseFile.set(project.file("LICENSE.txt"))
         }
 
