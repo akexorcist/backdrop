@@ -1,0 +1,4 @@
+<key>NSCameraUsageDescription</key>
+<string>Backdrop needs to use any camera access for video projection</string>
+<key>NSMicrophoneUsageDescription</key>
+<string>Backdrop needs to use any microphone access for audio projection</string>
