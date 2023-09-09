@@ -221,16 +221,21 @@ private fun MenuButtonContainer(
     onExitFullscreenClick: () -> Unit,
     onCloseAppClick: () -> Unit,
 ) {
-    Column {
+    val animatedButtonAlpha by animateFloatAsState(
+        targetValue = if (isMenuHiding) 0f else 1f,
+        animationSpec = tween(
+            durationMillis = 300,
+            easing = LinearEasing,
+        )
+    )
+    Column(modifier = Modifier.alpha(animatedButtonAlpha)) {
         CloseButton(
-            isHiding = isMenuHiding,
             onHidingMenuHovered = onHidingMenuHovered,
             onClick = onCloseAppClick,
         )
         Spacer(Modifier.size(16.dp))
         FullscreenButton(
             isFullScreen = isFullScreen,
-            isHiding = isMenuHiding,
             onHidingMenuHovered = onHidingMenuHovered,
             onClick = when (isFullScreen) {
                 true -> onExitFullscreenClick
@@ -240,7 +245,6 @@ private fun MenuButtonContainer(
         Spacer(Modifier.size(16.dp))
         ToggleUiButton(
             clickable = isToggleConsoleUiClickable,
-            isMenuHiding = isMenuHiding,
             isDeviceConsoleShowing = isDeviceConsoleShowing,
             onHidingMenuHovered = onHidingMenuHovered,
             onClick = onToggleConsoleUiClick,
@@ -251,30 +255,20 @@ private fun MenuButtonContainer(
 @Composable
 private fun ToggleUiButton(
     clickable: Boolean,
-    isMenuHiding: Boolean,
     isDeviceConsoleShowing: Boolean,
     onHidingMenuHovered: (Boolean) -> Unit,
     onClick: () -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
-    LaunchedEffect(isHovered) {
-        onHidingMenuHovered(isHovered)
-    }
-
     val animatedIconRotate by animateFloatAsState(
         targetValue = if (isDeviceConsoleShowing) 0f else 180f,
         animationSpec = tween(durationMillis = 300)
     )
-    val animatedButtonAlpha by animateFloatAsState(
-        targetValue = if (isMenuHiding) 0f else 1f,
-        animationSpec = tween(
-            durationMillis = 300,
-            easing = LinearEasing,
-        )
-    )
+
+    LaunchedEffect(isHovered) { onHidingMenuHovered(isHovered) }
+
     IconButton(
-        modifier = Modifier.alpha(animatedButtonAlpha),
         interactionSource = interactionSource,
         enabled = clickable,
         onClick = onClick,
@@ -289,26 +283,15 @@ private fun ToggleUiButton(
 
 @Composable
 private fun CloseButton(
-    isHiding: Boolean,
     onHidingMenuHovered: (Boolean) -> Unit,
     onClick: () -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
 
-    LaunchedEffect(isHovered) {
-        onHidingMenuHovered(isHovered)
-    }
-    val animatedButtonAlpha by animateFloatAsState(
-        targetValue = if (isHiding) 0f else 1f,
-        animationSpec = tween(
-            durationMillis = 300,
-            easing = LinearEasing,
-        )
-    )
+    LaunchedEffect(isHovered) { onHidingMenuHovered(isHovered) }
 
     IconButton(
-        modifier = Modifier.alpha(animatedButtonAlpha),
         interactionSource = interactionSource,
         enabled = true,
         onClick = onClick,
@@ -323,26 +306,15 @@ private fun CloseButton(
 @Composable
 private fun FullscreenButton(
     isFullScreen: Boolean,
-    isHiding: Boolean,
     onHidingMenuHovered: (Boolean) -> Unit,
     onClick: () -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
 
-    LaunchedEffect(isHovered) {
-        onHidingMenuHovered(isHovered)
-    }
-    val animatedButtonAlpha by animateFloatAsState(
-        targetValue = if (isHiding) 0f else 1f,
-        animationSpec = tween(
-            durationMillis = 300,
-            easing = LinearEasing,
-        )
-    )
+    LaunchedEffect(isHovered) { onHidingMenuHovered(isHovered) }
 
     IconButton(
-        modifier = Modifier.alpha(animatedButtonAlpha),
         interactionSource = interactionSource,
         enabled = true,
         onClick = onClick,
