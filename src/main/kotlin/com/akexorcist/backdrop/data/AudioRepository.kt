@@ -14,7 +14,7 @@ interface AudioRepository {
 
     fun setAudioOutput(name: String)
 
-    fun startAudioPlayback(): PlaybackStatus
+    fun startAudioPlayback(): AudioPlaybackStatus
 
     fun stopAudioPlayback()
 }
@@ -68,13 +68,13 @@ class DefaultAudioRepository : AudioRepository {
             ?.let { AudioSystem.getMixer(it) }
     }
 
-    override fun startAudioPlayback(): PlaybackStatus {
-        val inputMixer = this.inputMixer ?: return PlaybackStatus.AudioInputError
-        val outputMixer = this.outputMixer ?: return PlaybackStatus.AudioOutputError
+    override fun startAudioPlayback(): AudioPlaybackStatus {
+        val inputMixer = this.inputMixer ?: return AudioPlaybackStatus.AudioInputError
+        val outputMixer = this.outputMixer ?: return AudioPlaybackStatus.AudioOutputError
         val targetDataLine = getSupportedLine(inputMixer, TargetDataLine::class.java)
-            ?: return PlaybackStatus.AudioInputError
+            ?: return AudioPlaybackStatus.AudioInputError
         val sourceDataLine = getSupportedLine(outputMixer, SourceDataLine::class.java)
-            ?: return PlaybackStatus.AudioOutputError
+            ?: return AudioPlaybackStatus.AudioOutputError
         targetDataLine.apply {
             open()
             start()
@@ -96,7 +96,7 @@ class DefaultAudioRepository : AudioRepository {
 
         this.targetDataLine = targetDataLine
         this.sourceDataLine = sourceDataLine
-        return PlaybackStatus.Playing
+        return AudioPlaybackStatus.Playing
     }
 
     override fun stopAudioPlayback() {

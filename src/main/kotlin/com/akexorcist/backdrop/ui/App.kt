@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.*
 import com.akexorcist.backdrop.di.AppModule
+import com.akexorcist.backdrop.resource.StringResource
 import com.akexorcist.backdrop.ui.main.MainRoute
 import com.akexorcist.backdrop.ui.main.MainViewModel
 import com.akexorcist.backdrop.ui.theme.defaultColors
@@ -30,7 +31,7 @@ fun main() = application {
     )
     val coroutineScope = rememberCoroutineScope()
     Window(
-        title = "Backdrop",
+        title = StringResource.appName,
         state = windowState,
         undecorated = true,
         onCloseRequest = ::exitApplication,

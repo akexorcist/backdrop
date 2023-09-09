@@ -31,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.akexorcist.backdrop.config.DeviceName
 import com.akexorcist.backdrop.data.*
+import com.akexorcist.backdrop.resource.StringResource
 import kotlinx.coroutines.delay
 
 private val SectionWidth = 300.dp
@@ -227,7 +228,7 @@ private fun ToggleUiButton(
         Icon(
             modifier = Modifier.rotate(animatedIconRotate),
             imageVector = Icons.Default.ArrowBack,
-            contentDescription = "Toggle UI display",
+            contentDescription = StringResource.menuToggleUiDisplayContentDescription,
         )
     }
 }
@@ -260,7 +261,7 @@ private fun CloseButton(
     ) {
         Icon(
             imageVector = Icons.Default.Close,
-            contentDescription = "Close the app",
+            contentDescription = StringResource.menuCloseAppContentDescription,
         )
     }
 }
@@ -295,13 +296,13 @@ private fun FullscreenButton(
         Icon(
             painter = painterResource(
                 when (isFullScreen) {
-                    true -> "ic_exit_fullscreen.svg"
-                    false -> "ic_enter_fullscreen.svg"
+                    true -> "image/ic_exit_fullscreen.svg"
+                    false -> "image/ic_enter_fullscreen.svg"
                 }
             ),
             contentDescription = when (isFullScreen) {
-                true -> "Exit from fullscreen"
-                false -> "Enter to fullscreen"
+                true -> StringResource.menuExitFromFullscreenContentDescription
+                false -> StringResource.menuEnterToFullscreenContentDescription
             },
         )
     }
@@ -356,7 +357,7 @@ private fun VideoStatusInformation(
         val height = availableImageData.image.height
         val fps = availableImageData.frameRate.toInt()
         Text(
-            text = "Current Resolution",
+            text = StringResource.labelCurrentResolution,
             color = MaterialTheme.colors.secondary,
             fontWeight = FontWeight.Bold,
             style = MaterialTheme.typography.subtitle1,
@@ -415,7 +416,7 @@ private fun VideoResolutionInformation(
             .padding(16.dp)
     ) {
         Text(
-            text = "Resolution",
+            text = StringResource.labelResolution,
             color = MaterialTheme.colors.secondary,
             fontWeight = FontWeight.Bold,
             style = MaterialTheme.typography.subtitle1,
@@ -459,7 +460,7 @@ private fun VideoChooser(
 ) {
     DeviceChooser(
         modifier = Modifier.width(SectionWidth),
-        label = "Video",
+        label = StringResource.labelVideo,
         selectedDevice = selectedVideo?.name,
         selectedDeviceError = false,
         availableDeviceNames = availableVideos?.map { it.name },
@@ -482,7 +483,7 @@ private fun AudioInputChooser(
         modifier = Modifier
             .width(SectionWidth)
             .verticalScroll(rememberScrollState()),
-        label = "Audio Input",
+        label = StringResource.labelAudioInput,
         selectedDevice = selectedAudioInput?.name,
         selectedDeviceError = selectedAudioInputError,
         availableDeviceNames = availableAudioInputs?.map { it.name },
@@ -505,7 +506,7 @@ private fun AudioOutputChooser(
         modifier = Modifier
             .width(SectionWidth)
             .verticalScroll(rememberScrollState()),
-        label = "Audio Output",
+        label = StringResource.labelAudioOutput,
         selectedDevice = selectedAudioOutput?.name,
         selectedDeviceError = selectedAudioOutputError,
         availableDeviceNames = availableAudioOutputs?.map { it.name },

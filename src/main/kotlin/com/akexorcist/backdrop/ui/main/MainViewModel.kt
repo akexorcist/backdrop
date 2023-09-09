@@ -3,7 +3,7 @@ package com.akexorcist.backdrop.ui.main
 import com.akexorcist.backdrop.config.DeviceName
 import com.akexorcist.backdrop.data.AudioRepository
 import com.akexorcist.backdrop.data.ImageData
-import com.akexorcist.backdrop.data.PlaybackStatus
+import com.akexorcist.backdrop.data.AudioPlaybackStatus
 import com.akexorcist.backdrop.data.VideoRepository
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -117,8 +117,8 @@ class MainViewModel(
         _uiState.update {
             it.copy(
                 selectedAudioInput = audio,
-                selectedAudioInputError = status == PlaybackStatus.AudioInputError,
-                selectedAudioOutputError = status == PlaybackStatus.AudioOutputError && it.selectedAudioOutput?.name != DeviceName.AUDIO_NONE,
+                selectedAudioInputError = status == AudioPlaybackStatus.AudioInputError,
+                selectedAudioOutputError = status == AudioPlaybackStatus.AudioOutputError && it.selectedAudioOutput?.name != DeviceName.AUDIO_NONE,
             )
         }
     }
@@ -146,8 +146,8 @@ class MainViewModel(
         _uiState.update {
             it.copy(
                 selectedAudioOutput = audio,
-                selectedAudioOutputError = status == PlaybackStatus.AudioOutputError,
-                selectedAudioInputError = status == PlaybackStatus.AudioInputError && it.selectedAudioInput?.name != DeviceName.AUDIO_NONE,
+                selectedAudioOutputError = status == AudioPlaybackStatus.AudioOutputError,
+                selectedAudioInputError = status == AudioPlaybackStatus.AudioInputError && it.selectedAudioInput?.name != DeviceName.AUDIO_NONE,
             )
         }
     }
