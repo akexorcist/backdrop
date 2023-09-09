@@ -80,7 +80,6 @@ class DefaultAudioRepository : AudioRepository {
             start()
         }
 
-        println("Volume Control ${inputMixer.isControlSupported(FloatControl.Type.MASTER_GAIN)}")
         sourceDataLine.apply {
             open()
             start()
