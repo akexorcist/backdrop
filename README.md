@@ -7,7 +7,7 @@ Video and audio projection app for your streaming content on macOS
 ## Features
 * Select and display video input properties supported
 * Change video resolution supported
-* Select audio input/output supported[build.gradle.kts](build.gradle.kts)
+* Select audio input/output supported
 * Best for sharing your screen with friends on Live Streaming Apps like Discord
 
 ![Sharing Backdrop screen on Discord](./image/image_003.png)
@@ -39,6 +39,10 @@ Then the `Backdrop.app` will be in `<project>/build/compose/binaries/main/app`
 * [Material 3](https://m3.material.io/)
 * [Webcam Capture API](https://github.com/sarxos/webcam-capture)
 * [Native Driver for Webcam Capture API](https://github.com/eduramiba/webcam-capture-driver-native)
+
+## Troubleshooting
+### The video list does not refresh when a device is plugged in
+There's an issue with the Webcam Capture API. For a workaround, close the app and reopen it
 
 ## License
 [Apache License, Version 2.0](./LICENSE.txt)
