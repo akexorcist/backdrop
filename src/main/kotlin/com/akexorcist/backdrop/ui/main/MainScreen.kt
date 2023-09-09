@@ -412,7 +412,7 @@ private fun VideoStatusInformation(
         val fps = availableImageData.frameRate.toInt()
         Text(
             text = StringResource.labelCurrentResolution,
-            color = MaterialTheme.colors.secondary,
+            color = MaterialTheme.colors.primary,
             fontWeight = FontWeight.Bold,
             style = MaterialTheme.typography.subtitle1,
         )
@@ -471,7 +471,7 @@ private fun VideoResolutionInformation(
     ) {
         Text(
             text = StringResource.labelResolution,
-            color = MaterialTheme.colors.secondary,
+            color = MaterialTheme.colors.primary,
             fontWeight = FontWeight.Bold,
             style = MaterialTheme.typography.subtitle1,
         )
@@ -591,7 +591,7 @@ private fun DeviceChooser(
             Spacer(Modifier.size(8.dp))
             Text(
                 text = label,
-                color = MaterialTheme.colors.secondary,
+                color = MaterialTheme.colors.primary,
                 fontWeight = FontWeight.Bold,
                 style = MaterialTheme.typography.subtitle1,
             )
@@ -632,7 +632,7 @@ private fun DeviceChooser(
                                 text = name,
                                 color = when {
                                     name == selectedDevice && selectedDeviceError -> MaterialTheme.colors.error
-                                    name == selectedDevice -> MaterialTheme.colors.secondary
+                                    name == selectedDevice -> MaterialTheme.colors.primary
                                     else -> MaterialTheme.colors.onSurface
                                 }
                             )

@@ -3,8 +3,8 @@ package com.akexorcist.backdrop.ui.theme
 import androidx.compose.material.Colors
 
 val defaultColors = Colors(
-    primary = MaterialColor.Teal500,
-    primaryVariant = MaterialColor.Teal600,
+    primary = MaterialColor.Orange500,
+    primaryVariant = MaterialColor.Orange600,
     secondary = MaterialColor.Orange500,
     secondaryVariant = MaterialColor.Orange600,
     background = MaterialColor.Gray900,
