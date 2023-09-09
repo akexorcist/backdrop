@@ -35,6 +35,9 @@ compose.desktop {
             )
             packageName = "Backdrop"
             packageVersion = "1.0.0"
+            macOS {
+                iconFile.set(project.file("icon.icns"))
+            }
         }
     }
 }
