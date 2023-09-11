@@ -29,7 +29,7 @@ Prerequisite
 ```
 git clone https://github.com/akexorcist/backdrop.git
 cd backdrop
-./gradlew createDistributable
+./gradlew run
 ```
 
 Then the `Backdrop.app` will be in `<project>/build/compose/binaries/main/app`
