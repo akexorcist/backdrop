@@ -23,6 +23,7 @@ Video and audio projection app for your streaming content on macOS
 
 ## Build an app from source code
 Prerequisite
+* Xcode
 * JDK 17
 * Terminal or alternative CLI Tools
 
@@ -32,7 +33,18 @@ cd backdrop
 ./gradlew run
 ```
 
-Then the `Backdrop.app` will be in `<project>/build/compose/binaries/main/app`
+## Build and install an app in your macOS with self-signed app
+* Build an app to `.dmg` file with `./gradlew packageDmg`
+  * Output file will be in `<project>/build/compose/binaries/main/dmg`
+* Open `.dmg` file and move the app to `Applications` directory
+* Create self-signed certificate from `Keychain Access`
+  * `Keychain access` > `Certificate Assistant` > `Create a Certificate...`
+  * Identity Type: `Self Signed Root`
+  * Certificate Type: `Code Signing`
+* Do manual codesign in command line with your self-signed certificate
+  * `codesign -fs <certificate_name> --deep <path_to_app>`
+  * `codesign -fs Akexorcist --deep /Applications/Backdrop.app`
+* Finally, you can run the app on your machine with your self-signed certificate
 
 ## Powered by
 * [Compose Multiplatform](https://www.jetbrains.com/lp/compose-multiplatform/)
