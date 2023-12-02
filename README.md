@@ -33,7 +33,7 @@ cd backdrop
 ./gradlew run
 ```
 
-## Build and install an app in your macOS with self-signed app
+## Build and install an app on your macOS device with self-signed certificates
 * Build an app to `.dmg` file with `./gradlew packageDmg`
   * Output file will be in `<project>/build/compose/binaries/main/dmg`
 * Open `.dmg` file and move the app to `Applications` directory
