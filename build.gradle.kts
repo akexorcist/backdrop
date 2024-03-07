@@ -3,7 +3,7 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 plugins {
     kotlin("jvm")
     id("org.jetbrains.compose")
-    id("org.openjfx.javafxplugin") version "0.0.13"
+    id("org.openjfx.javafxplugin") version "0.1.0"
 }
 
 group = "com.akexorcist.backdrop"
@@ -20,7 +20,7 @@ dependencies {
     implementation(compose.desktop.currentOs)
     implementation("com.github.sarxos:webcam-capture:0.3.12")
     implementation("com.github.eduramiba:webcam-capture-driver-native:master-SNAPSHOT")
-    implementation("io.insert-koin:koin-core:3.5.0")
+    implementation("io.insert-koin:koin-core:3.5.3")
 }
 
 compose.desktop {
