@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.akexorcist.backdrop"
-version = "1.0-SNAPSHOT"
+version = "1.0.1"
 
 repositories {
     mavenCentral()
@@ -17,10 +17,18 @@ repositories {
 }
 
 dependencies {
+    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
     implementation(compose.desktop.currentOs)
-    implementation("com.github.sarxos:webcam-capture:0.3.12")
-    implementation("com.github.eduramiba:webcam-capture-driver-native:master-SNAPSHOT")
     implementation("io.insert-koin:koin-core:3.5.3")
+    implementation("com.github.sarxos:webcam-capture:0.3.12")
+
+    // Until they accept my pull request
+//    implementation("com.github.eduramiba:webcam-capture-driver-native:master-SNAPSHOT")
+    implementation("org.slf4j:slf4j-api:2.0.12")
+    implementation("net.java.dev.jna:jna:5.14.0")
+    implementation("net.java.dev.jna:jna-platform:5.14.0")
+    implementation("com.fasterxml:aalto-xml:1.3.2")
+    implementation("org.openjfx:javafx-graphics:19")
 }
 
 compose.desktop {
@@ -30,7 +38,7 @@ compose.desktop {
         nativeDistributions {
             targetFormats(
                 TargetFormat.Dmg,
-//                TargetFormat.Msi,
+                TargetFormat.Msi,
             )
 
             macOS {
@@ -43,7 +51,7 @@ compose.desktop {
             }
 
             packageName = "Backdrop"
-            packageVersion = "1.0.0"
+            packageVersion = "1.0.1"
             description = "Video and audio projection app for your streaming content"
             licenseFile.set(project.file("LICENSE.txt"))
         }
