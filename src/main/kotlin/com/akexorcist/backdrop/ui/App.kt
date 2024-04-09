@@ -6,7 +6,6 @@ import androidx.compose.foundation.window.WindowDraggableArea
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.*
@@ -17,11 +16,17 @@ import com.akexorcist.backdrop.ui.main.MainViewModel
 import com.akexorcist.backdrop.ui.theme.defaultColors
 import com.github.eduramiba.webcamcapture.drivers.NativeDriver
 import com.github.sarxos.webcam.Webcam
+import com.github.sarxos.webcam.ds.openimaj.OpenImajDriver
 import org.koin.core.context.startKoin
 import org.koin.java.KoinJavaComponent.get
 
 fun main() = application {
-    Webcam.setDriver(NativeDriver())
+    val os = System.getProperty("os.name", "generic").lowercase()
+    if (os.contains("win")) {
+        Webcam.setDriver(OpenImajDriver())
+    } else {
+        Webcam.setDriver(NativeDriver())
+    }
     startKoin { modules(AppModule.modules) }
     val windowState = rememberWindowState(
         position = WindowPosition.Aligned(Alignment.Center),

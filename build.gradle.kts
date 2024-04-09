@@ -29,6 +29,8 @@ dependencies {
     implementation("net.java.dev.jna:jna-platform:5.14.0")
     implementation("com.fasterxml:aalto-xml:1.3.2")
     implementation("org.openjfx:javafx-graphics:19")
+
+    implementation("org.openimaj:core-video-capture:1.3.10")
 }
 
 compose.desktop {
