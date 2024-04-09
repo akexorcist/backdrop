@@ -21,6 +21,7 @@ dependencies {
     implementation(compose.desktop.currentOs)
     implementation("io.insert-koin:koin-core:3.5.3")
     implementation("com.github.sarxos:webcam-capture:0.3.12")
+    implementation("com.github.sarxos:webcam-capture-driver-openimaj:0.3.12")
 
     // Until they accept my pull request
 //    implementation("com.github.eduramiba:webcam-capture-driver-native:master-SNAPSHOT")
@@ -29,27 +30,6 @@ dependencies {
     implementation("net.java.dev.jna:jna-platform:5.14.0")
     implementation("com.fasterxml:aalto-xml:1.3.2")
     implementation("org.openjfx:javafx-graphics:19")
-
-    implementation("org.openimaj:core-video-capture:1.3.10") {
-        exclude(group = "org.openimaj.content", module = "animation")
-        exclude(group = "org.openimaj", module = "core-audio")
-        exclude(group = "org.openimaj", module = "core-math")
-        exclude(group = "com.twelvemonkeys.common", module = "common-lang")
-        exclude(group = "com.sun.media", module = "jai-codec")
-        exclude(group = "javax.media", module = "jai-core")
-        exclude(group = "net.sourceforge.jeuclid", module = "jeuclid-core")
-        exclude(group = "org.openimaj", module = "core")
-        exclude(group = "uk.ac.ed.ph.snuggletex", module = "snuggletex-core")
-        exclude(group = "com.googlecode.json-simple", module = "json-simple")
-        exclude(group = "com.flickr4java", module = "flickr4java")
-        exclude(group = "uk.ac.ed.ph.snuggletex", module = "snuggletex-upconversion")
-        exclude(group = "org.apache.sanselan", module = "sanselan")
-        exclude(group = "com.caffeineowl", module = "bezier-utils")
-        exclude(group = "com.twelvemonkeys.imageio", module = "imageio-core")
-        exclude(group = "uk.ac.ed.ph.snuggletex", module = "snuggletex-jeuclid")
-        exclude(group = "com.twelvemonkeys.imageio", module = "imageio-jpeg")
-        exclude(group = "com.nativelibs4java", module = "bridj")
-    }
 }
 
 compose.desktop {
