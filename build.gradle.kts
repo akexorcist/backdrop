@@ -44,11 +44,15 @@ compose.desktop {
 
             macOS {
                 bundleID = "com.akexorcist.backdrop"
-                iconFile.set(project.file("icon.icns"))
+                iconFile.set(project.file("image/icons/icon.icns"))
                 entitlementsFile.set(project.file("macos/entitlement.plist"))
                 infoPlist {
                     extraKeysRawXml = project.file("macos/info.plist").readText()
                 }
+            }
+
+            windows {
+                iconFile.set(project.file("image/icons/icon.ico"))
             }
 
             packageName = "Backdrop"
