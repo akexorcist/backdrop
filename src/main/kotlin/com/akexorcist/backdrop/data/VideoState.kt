@@ -3,13 +3,13 @@ package com.akexorcist.backdrop.data
 import java.awt.image.BufferedImage
 
 sealed class VideoState {
-    object Open : VideoState()
+    data object Open : VideoState()
 
-    object Closed : VideoState()
+    data object Closed : VideoState()
 
-    object Disposed : VideoState()
+    data object Disposed : VideoState()
 
-    object ImageObtained : VideoState()
+    data object ImageObtained : VideoState()
 }
 
 data class ImageData(

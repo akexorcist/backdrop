@@ -17,7 +17,9 @@ interface VideoRepository {
     fun collectAvailableImageData(): StateFlow<ImageData?>
 }
 
-class DefaultVideoRepository : VideoRepository {
+class DefaultVideoRepository(
+    private val frameRateCounter: RawFrameRateCounter,
+) : VideoRepository {
     private var currentVideo: MutableStateFlow<Webcam?> = MutableStateFlow(null)
     private val videoEventFlow: MutableStateFlow<VideoState> = MutableStateFlow(VideoState.Closed)
     private val availableImageDataFlow: MutableStateFlow<ImageData?> = MutableStateFlow(null)
@@ -89,11 +91,13 @@ class DefaultVideoRepository : VideoRepository {
             videoEventFlow.update {
                 VideoState.ImageObtained
             }
+            val frameRate = frameRateCounter.calculateFrameRate()
             availableImageDataFlow.update {
                 ImageData(
                     image = event.image,
                     timestamp = System.currentTimeMillis(),
-                    frameRate = currentVideo.value?.fps ?: 0.0
+//                    frameRate = currentVideo.value?.fps ?: 0.0
+                    frameRate = frameRate
                 )
             }
         }

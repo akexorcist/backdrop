@@ -19,7 +19,7 @@ repositories {
 dependencies {
     implementation(compose.desktop.currentOs)
     implementation("com.github.sarxos:webcam-capture:0.3.12")
-    implementation("com.github.eduramiba:webcam-capture-driver-native:master-SNAPSHOT")
+    implementation("io.github.eduramiba:webcam-capture-driver-native:1.2.0")
     implementation("io.insert-koin:koin-core:3.5.3")
 }
 
