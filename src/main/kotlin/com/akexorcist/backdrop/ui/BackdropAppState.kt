@@ -2,9 +2,12 @@ package com.akexorcist.backdrop.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowState
+import com.akexorcist.backdrop.ui.main.Video
 import kotlinx.coroutines.delay
 
 @Composable
@@ -36,6 +39,13 @@ class BackdropAppState(
 
     fun exitFullScreen() {
         windowState.placement = WindowPlacement.Floating
+    }
+
+    fun fitToVideoInputSize(resolution: Video.Resolution) {
+        windowState.size = DpSize(
+            width = resolution.width.dp,
+            height = resolution.height.dp,
+        )
     }
 
     fun exitApplication() {

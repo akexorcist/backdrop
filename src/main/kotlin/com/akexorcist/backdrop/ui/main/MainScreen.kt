@@ -31,8 +31,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.akexorcist.backdrop.config.DeviceName
 import com.akexorcist.backdrop.data.*
+import com.akexorcist.backdrop.extension.surfaceBackground
 import com.akexorcist.backdrop.resource.StringResource
 import com.akexorcist.backdrop.ui.BackdropAppState
+import com.akexorcist.backdrop.ui.main.component.AudioInputChooser
+import com.akexorcist.backdrop.ui.main.component.AudioOutputChooser
+import com.akexorcist.backdrop.ui.main.component.MenuButtonContainer
+import com.akexorcist.backdrop.ui.main.component.VideoChooser
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -169,6 +174,7 @@ private fun MainScreen(
                         modifier = Modifier.verticalScroll(rememberScrollState())
                     ) {
                         VideoChooser(
+                            modifier = Modifier.width(SectionWidth),
                             selectedVideo = selectedVideo,
                             availableVideos = availableVideo,
                             onVideoSelect = onVideoSelect,
@@ -191,6 +197,7 @@ private fun MainScreen(
                     // Audio
                     Spacer(Modifier.size(16.dp))
                     AudioInputChooser(
+                        modifier = Modifier.width(SectionWidth),
                         selectedAudioInput = selectedAudioInput,
                         selectedAudioInputError = selectedAudioInputError,
                         availableAudioInputs = availableAudioInputs,
@@ -198,6 +205,7 @@ private fun MainScreen(
                     )
                     Spacer(Modifier.size(16.dp))
                     AudioOutputChooser(
+                        modifier = Modifier.width(SectionWidth),
                         selectedAudioOutput = selectedAudioOutput,
                         selectedAudioOutputError = selectedAudioOutputError,
                         availableAudioOutputs = availableAudioOutputs,
@@ -206,185 +214,6 @@ private fun MainScreen(
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun MenuButtonContainer(
-    isFullScreen: Boolean,
-    isToggleConsoleUiClickable: Boolean,
-    isDeviceConsoleShowing: Boolean,
-    isMenuHiding: Boolean,
-    onHidingMenuHovered: (Boolean) -> Unit,
-    onToggleConsoleUiClick: () -> Unit,
-    onEnterFullscreen: () -> Unit,
-    onExitFullscreenClick: () -> Unit,
-    onCloseAppClick: () -> Unit,
-) {
-    val animatedButtonAlpha by animateFloatAsState(
-        targetValue = if (isMenuHiding) 0f else 1f,
-        animationSpec = tween(
-            durationMillis = 300,
-            easing = LinearEasing,
-        )
-    )
-    Column(modifier = Modifier.alpha(animatedButtonAlpha)) {
-        CloseButton(
-            onHidingMenuHovered = onHidingMenuHovered,
-            onClick = onCloseAppClick,
-        )
-        Spacer(Modifier.size(16.dp))
-        FullscreenButton(
-            isFullScreen = isFullScreen,
-            onHidingMenuHovered = onHidingMenuHovered,
-            onClick = when (isFullScreen) {
-                true -> onExitFullscreenClick
-                false -> onEnterFullscreen
-            },
-        )
-        Spacer(Modifier.size(16.dp))
-        ToggleUiButton(
-            clickable = isToggleConsoleUiClickable,
-            isDeviceConsoleShowing = isDeviceConsoleShowing,
-            onHidingMenuHovered = onHidingMenuHovered,
-            onClick = onToggleConsoleUiClick,
-        )
-    }
-}
-
-@Composable
-private fun ToggleUiButton(
-    clickable: Boolean,
-    isDeviceConsoleShowing: Boolean,
-    onHidingMenuHovered: (Boolean) -> Unit,
-    onClick: () -> Unit,
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isHovered by interactionSource.collectIsHoveredAsState()
-    val animatedIconRotate by animateFloatAsState(
-        targetValue = if (isDeviceConsoleShowing) 0f else 180f,
-        animationSpec = tween(durationMillis = 300)
-    )
-
-    LaunchedEffect(isHovered) { onHidingMenuHovered(isHovered) }
-
-    IconButton(
-        interactionSource = interactionSource,
-        enabled = clickable,
-        onClick = onClick,
-    ) {
-        Icon(
-            modifier = Modifier.rotate(animatedIconRotate),
-            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-            contentDescription = StringResource.menuToggleUiDisplayContentDescription,
-        )
-    }
-}
-
-@Composable
-private fun CloseButton(
-    onHidingMenuHovered: (Boolean) -> Unit,
-    onClick: () -> Unit,
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isHovered by interactionSource.collectIsHoveredAsState()
-
-    LaunchedEffect(isHovered) { onHidingMenuHovered(isHovered) }
-
-    IconButton(
-        interactionSource = interactionSource,
-        enabled = true,
-        colors = IconButtonColors.Close,
-        onClick = onClick,
-    ) {
-        Icon(
-            imageVector = Icons.Default.Close,
-            contentDescription = StringResource.menuCloseAppContentDescription,
-        )
-    }
-}
-
-@Composable
-private fun FullscreenButton(
-    isFullScreen: Boolean,
-    onHidingMenuHovered: (Boolean) -> Unit,
-    onClick: () -> Unit,
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isHovered by interactionSource.collectIsHoveredAsState()
-
-    LaunchedEffect(isHovered) { onHidingMenuHovered(isHovered) }
-
-    IconButton(
-        interactionSource = interactionSource,
-        enabled = true,
-        onClick = onClick,
-    ) {
-        Icon(
-            painter = painterResource(
-                when (isFullScreen) {
-                    true -> "image/ic_exit_fullscreen.svg"
-                    false -> "image/ic_enter_fullscreen.svg"
-                }
-            ),
-            contentDescription = when (isFullScreen) {
-                true -> StringResource.menuExitFromFullscreenContentDescription
-                false -> StringResource.menuEnterToFullscreenContentDescription
-            },
-        )
-    }
-}
-
-enum class IconButtonColors(
-    val buttonColors: @Composable () -> ButtonColors,
-) {
-    Normal(
-        buttonColors = {
-            ButtonDefaults.buttonColors(
-                backgroundColor = MaterialTheme.colors.surface.copy(alpha = 0.7f),
-                contentColor = MaterialTheme.colors.onSurface,
-                disabledBackgroundColor = MaterialTheme.colors.surface.copy(alpha = 0.125f),
-                disabledContentColor = MaterialTheme.colors.onSurface.copy(alpha = 0.125f),
-            )
-        }
-    ),
-    Close(
-        buttonColors = {
-            ButtonDefaults.buttonColors(
-                backgroundColor = MaterialTheme.colors.error.copy(alpha = 0.3f),
-                contentColor = MaterialTheme.colors.onError,
-                disabledBackgroundColor = MaterialTheme.colors.error.copy(alpha = 0.1f),
-                disabledContentColor = MaterialTheme.colors.onError.copy(alpha = 0.1f),
-            )
-        }
-    );
-}
-
-@Composable
-private fun IconButton(
-    modifier: Modifier = Modifier,
-    interactionSource: MutableInteractionSource,
-    enabled: Boolean,
-    colors: IconButtonColors = IconButtonColors.Normal,
-    onClick: () -> Unit,
-    content: @Composable () -> Unit
-) {
-    Button(
-        modifier = Modifier.size(48.dp).then(modifier),
-        colors = colors.buttonColors(),
-        elevation = ButtonDefaults.elevation(
-            defaultElevation = 0.dp,
-            pressedElevation = 0.dp,
-            disabledElevation = 0.dp,
-            hoveredElevation = 0.dp,
-            focusedElevation = 0.dp,
-        ),
-        enabled = enabled,
-        shape = RoundedCornerShape(16.dp),
-        interactionSource = interactionSource,
-        onClick = onClick,
-    ) {
-        content()
     }
 }
 
@@ -499,165 +328,3 @@ private fun VideoResolutionInformation(
         }
     }
 }
-
-@Composable
-private fun VideoChooser(
-    selectedVideo: Video?,
-    availableVideos: List<Video>?,
-    onVideoSelect: (Video) -> Unit,
-) {
-    DeviceChooser(
-        modifier = Modifier.width(SectionWidth),
-        label = StringResource.labelVideo,
-        selectedDevice = selectedVideo?.name,
-        selectedDeviceError = false,
-        availableDeviceNames = availableVideos?.map { it.name },
-        onDeviceSelect = { selectedDevice ->
-            availableVideos
-                ?.find { it.name == selectedDevice }
-                ?.let { onVideoSelect(it) }
-        }
-    )
-}
-
-@Composable
-private fun AudioInputChooser(
-    selectedAudioInput: Audio?,
-    selectedAudioInputError: Boolean,
-    availableAudioInputs: List<Audio>?,
-    onAudioInputSelect: (Audio) -> Unit,
-) {
-    DeviceChooser(
-        modifier = Modifier
-            .width(SectionWidth)
-            .verticalScroll(rememberScrollState()),
-        label = StringResource.labelAudioInput,
-        selectedDevice = selectedAudioInput?.name,
-        selectedDeviceError = selectedAudioInputError,
-        availableDeviceNames = availableAudioInputs?.map { it.name },
-        onDeviceSelect = { selectedAudio ->
-            availableAudioInputs
-                ?.find { it.name == selectedAudio }
-                ?.let { onAudioInputSelect(it) }
-        }
-    )
-}
-
-@Composable
-private fun AudioOutputChooser(
-    selectedAudioOutput: Audio?,
-    selectedAudioOutputError: Boolean,
-    availableAudioOutputs: List<Audio>?,
-    onAudioOutputSelect: (Audio) -> Unit,
-) {
-    DeviceChooser(
-        modifier = Modifier
-            .width(SectionWidth)
-            .verticalScroll(rememberScrollState()),
-        label = StringResource.labelAudioOutput,
-        selectedDevice = selectedAudioOutput?.name,
-        selectedDeviceError = selectedAudioOutputError,
-        availableDeviceNames = availableAudioOutputs?.map { it.name },
-        onDeviceSelect = { selectedAudio ->
-            availableAudioOutputs
-                ?.find { it.name == selectedAudio }
-                ?.let { onAudioOutputSelect(it) }
-        }
-    )
-}
-
-@Composable
-private fun DeviceChooser(
-    modifier: Modifier,
-    label: String,
-    selectedDevice: String?,
-    selectedDeviceError: Boolean,
-    availableDeviceNames: List<String>?,
-    onDeviceSelect: (String) -> Unit,
-) {
-    Column(
-        modifier = modifier
-            .surfaceBackground()
-            .padding(8.dp)
-    ) {
-        Spacer(Modifier.size(8.dp))
-        Row {
-            Spacer(Modifier.size(8.dp))
-            Text(
-                text = label,
-                color = MaterialTheme.colors.primary,
-                fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.subtitle1,
-            )
-            Spacer(Modifier.size(16.dp))
-        }
-        Spacer(Modifier.size(16.dp))
-        AnimatedVisibility(visible = availableDeviceNames != null) {
-            if (availableDeviceNames != null) {
-                Column {
-                    availableDeviceNames.forEachIndexed { index, name ->
-                        Row(
-                            modifier = Modifier
-                                .wrapContentWidth()
-                                .clip(RoundedCornerShape(8.dp))
-                                .selectable(
-                                    selected = name == selectedDevice,
-                                    onClick = { onDeviceSelect(name) },
-                                    role = Role.RadioButton,
-                                )
-                                .padding(8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            RadioButton(
-                                selected = name == selectedDevice,
-                                onClick = null,
-                                colors = when {
-                                    name == selectedDevice && selectedDeviceError -> RadioButtonDefaults.colors(
-                                        selectedColor = MaterialTheme.colors.error,
-                                        unselectedColor = MaterialTheme.colors.onError.copy(alpha = 0.6f),
-                                        disabledColor = MaterialTheme.colors.onError.copy(alpha = ContentAlpha.disabled),
-                                    )
-
-                                    else -> RadioButtonDefaults.colors()
-                                }
-                            )
-                            Spacer(Modifier.size(8.dp))
-                            Text(
-                                text = name,
-                                color = when {
-                                    name == selectedDevice && selectedDeviceError -> MaterialTheme.colors.error
-                                    name == selectedDevice -> MaterialTheme.colors.primary
-                                    else -> MaterialTheme.colors.onSurface
-                                }
-                            )
-                        }
-                        if (index != availableDeviceNames.lastIndex) {
-                            Spacer(Modifier.size(8.dp))
-                        }
-                    }
-                }
-            }
-        }
-        AnimatedVisibility(visible = availableDeviceNames == null) {
-            DeviceListLoading()
-        }
-    }
-}
-
-@Composable
-private fun DeviceListLoading() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(40.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        LinearProgressIndicator(color = MaterialTheme.colors.onSurface)
-    }
-}
-
-@Composable
-private fun Modifier.surfaceBackground() = this.background(
-    color = MaterialTheme.colors.surface.copy(alpha = 0.7f),
-    shape = RoundedCornerShape(16.dp),
-).padding(horizontal = 8.dp, vertical = 16.dp)
