@@ -31,7 +31,7 @@ class MainViewModel(
 
     val availableImageData: StateFlow<ImageData?> = videoRepository.collectAvailableImageData()
 
-    suspend fun observeVideoInput() = coroutineScope.launch {
+    fun observeVideoInput() = coroutineScope.launch {
         videoRepository.getAvailableWebcam().collectLatest { videos ->
             val newVideos = listOf(noSelectedVideo) + videos.map { webcam ->
                 Video(
@@ -48,7 +48,7 @@ class MainViewModel(
         }
     }
 
-    suspend fun observeAudioInput() = coroutineScope.launch {
+    fun observeAudioInput() = coroutineScope.launch {
         audioRepository.getAvailableAudioInputs().collectLatest { audios ->
             val newAudios = listOf(noSelectedAudio) + audios.map { (_, info) ->
                 Audio(info.name)
@@ -61,7 +61,7 @@ class MainViewModel(
         }
     }
 
-    suspend fun observeAudioOutput() = coroutineScope.launch {
+    fun observeAudioOutput() = coroutineScope.launch {
         audioRepository.getAvailableAudioOutputs().collectLatest { audios ->
             val newAudios = listOf(noSelectedAudio) + audios.map { (_, info) ->
                 Audio(info.name)
@@ -152,4 +152,3 @@ class MainViewModel(
         }
     }
 }
-

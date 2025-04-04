@@ -4,6 +4,9 @@ import com.github.sarxos.webcam.*
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
 import java.awt.Dimension
+import java.util.concurrent.atomic.AtomicLong
+
+private const val FRAME_RATE_UPDATE_INTERVAL_IN_MILLISECOND = 200L
 
 interface VideoRepository {
     fun getAvailableWebcam(): Flow<List<Webcam>>
@@ -23,6 +26,7 @@ class DefaultVideoRepository(
     private var currentVideo: MutableStateFlow<Webcam?> = MutableStateFlow(null)
     private val videoEventFlow: MutableStateFlow<VideoState> = MutableStateFlow(VideoState.Closed)
     private val availableImageDataFlow: MutableStateFlow<ImageData?> = MutableStateFlow(null)
+    private val lastEmissionTime = AtomicLong(0L)
 
     override fun getAvailableWebcam(): Flow<List<Webcam>> = callbackFlow {
         trySend(Webcam.getWebcams())
@@ -68,37 +72,34 @@ class DefaultVideoRepository(
 
     override fun collectAvailableImageData(): StateFlow<ImageData?> = availableImageDataFlow
 
-    private val webcamListener = object : WebcamListener {
+    private val webcamListener: WebcamListener = object : WebcamListener {
         override fun webcamOpen(event: WebcamEvent) {
-            videoEventFlow.update {
-                VideoState.Open
-            }
+            videoEventFlow.update { VideoState.Open }
         }
 
         override fun webcamClosed(event: WebcamEvent) {
-            videoEventFlow.update {
-                VideoState.Closed
-            }
+            videoEventFlow.update { VideoState.Closed }
         }
 
         override fun webcamDisposed(event: WebcamEvent) {
-            videoEventFlow.update {
-                VideoState.Disposed
-            }
+            videoEventFlow.update { VideoState.Disposed }
         }
 
         override fun webcamImageObtained(event: WebcamEvent) {
-            videoEventFlow.update {
-                VideoState.ImageObtained
-            }
+            videoEventFlow.update { VideoState.ImageObtained }
             val frameRate = frameRateCounter.calculateFrameRate()
-            availableImageDataFlow.update {
-                ImageData(
-                    image = event.image,
-                    timestamp = System.currentTimeMillis(),
+            val currentTime = System.currentTimeMillis()
+            val timeSinceLastEmission = currentTime - lastEmissionTime.get()
+            if (timeSinceLastEmission >= FRAME_RATE_UPDATE_INTERVAL_IN_MILLISECOND) {
+                availableImageDataFlow.update {
+                    ImageData(
+                        image = event.image,
+                        timestamp = System.currentTimeMillis(),
 //                    frameRate = currentVideo.value?.fps ?: 0.0
-                    frameRate = frameRate
-                )
+                        frameRate = frameRate
+                    )
+                }
+                lastEmissionTime.set(currentTime)
             }
         }
     }

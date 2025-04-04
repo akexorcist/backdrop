@@ -7,7 +7,6 @@ class RawFrameRateCounter {
     fun calculateFrameRate(): Double {
         val currentTimestamp = System.currentTimeMillis()
         frameCount++
-
         var frameRate = 0.0
         if (lastTimestamp != 0L) {
             val elapsedTime = currentTimestamp - lastTimestamp
@@ -15,7 +14,6 @@ class RawFrameRateCounter {
                 frameRate = 1000.0 / elapsedTime
             }
         }
-
         lastTimestamp = currentTimestamp
         return frameRate
     }
