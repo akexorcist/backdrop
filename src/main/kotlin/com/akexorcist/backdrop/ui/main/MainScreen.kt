@@ -14,7 +14,7 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -275,7 +275,7 @@ private fun ToggleUiButton(
     ) {
         Icon(
             modifier = Modifier.rotate(animatedIconRotate),
-            imageVector = Icons.Default.ArrowBack,
+            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
             contentDescription = StringResource.menuToggleUiDisplayContentDescription,
         )
     }
@@ -294,6 +294,7 @@ private fun CloseButton(
     IconButton(
         interactionSource = interactionSource,
         enabled = true,
+        colors = IconButtonColors.Close,
         onClick = onClick,
     ) {
         Icon(
@@ -334,22 +335,43 @@ private fun FullscreenButton(
     }
 }
 
+enum class IconButtonColors(
+    val buttonColors: @Composable () -> ButtonColors,
+) {
+    Normal(
+        buttonColors = {
+            ButtonDefaults.buttonColors(
+                backgroundColor = MaterialTheme.colors.surface.copy(alpha = 0.7f),
+                contentColor = MaterialTheme.colors.onSurface,
+                disabledBackgroundColor = MaterialTheme.colors.surface.copy(alpha = 0.125f),
+                disabledContentColor = MaterialTheme.colors.onSurface.copy(alpha = 0.125f),
+            )
+        }
+    ),
+    Close(
+        buttonColors = {
+            ButtonDefaults.buttonColors(
+                backgroundColor = MaterialTheme.colors.error.copy(alpha = 0.3f),
+                contentColor = MaterialTheme.colors.onError,
+                disabledBackgroundColor = MaterialTheme.colors.error.copy(alpha = 0.1f),
+                disabledContentColor = MaterialTheme.colors.onError.copy(alpha = 0.1f),
+            )
+        }
+    );
+}
+
 @Composable
 private fun IconButton(
     modifier: Modifier = Modifier,
     interactionSource: MutableInteractionSource,
     enabled: Boolean,
+    colors: IconButtonColors = IconButtonColors.Normal,
     onClick: () -> Unit,
     content: @Composable () -> Unit
 ) {
     Button(
         modifier = Modifier.size(48.dp).then(modifier),
-        colors = ButtonDefaults.buttonColors(
-            backgroundColor = MaterialTheme.colors.surface.copy(alpha = 0.7f),
-            contentColor = MaterialTheme.colors.onSurface,
-            disabledBackgroundColor = MaterialTheme.colors.surface.copy(alpha = 0.125f),
-            disabledContentColor = MaterialTheme.colors.onSurface.copy(alpha = 0.125f),
-        ),
+        colors = colors.buttonColors(),
         elevation = ButtonDefaults.elevation(
             defaultElevation = 0.dp,
             pressedElevation = 0.dp,

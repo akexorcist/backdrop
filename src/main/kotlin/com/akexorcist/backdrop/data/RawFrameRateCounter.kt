@@ -1,7 +1,5 @@
 package com.akexorcist.backdrop.data
 
-import kotlin.time.ExperimentalTime
-
 class RawFrameRateCounter {
     private var lastTimestamp: Long = 0
     private var frameCount: Int = 0
