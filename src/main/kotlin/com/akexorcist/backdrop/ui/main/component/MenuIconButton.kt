@@ -1,6 +1,7 @@
 package com.akexorcist.backdrop.ui.main.component
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
@@ -9,6 +10,7 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 enum class IconButtonColors(
@@ -21,6 +23,16 @@ enum class IconButtonColors(
                 contentColor = MaterialTheme.colors.onSurface,
                 disabledBackgroundColor = MaterialTheme.colors.surface.copy(alpha = 0.125f),
                 disabledContentColor = MaterialTheme.colors.onSurface.copy(alpha = 0.125f),
+            )
+        }
+    ),
+    Enabled(
+        buttonColors = {
+            ButtonDefaults.buttonColors(
+                backgroundColor = MaterialTheme.colors.primary.copy(alpha = 0.5f),
+                contentColor = MaterialTheme.colors.onPrimary,
+                disabledBackgroundColor = MaterialTheme.colors.primary.copy(alpha = 0.125f),
+                disabledContentColor = MaterialTheme.colors.onPrimary.copy(alpha = 0.125f),
             )
         }
     ),
@@ -42,6 +54,7 @@ fun MenuIconButton(
     interactionSource: MutableInteractionSource,
     enabled: Boolean,
     colors: IconButtonColors = IconButtonColors.Normal,
+    contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
     onClick: () -> Unit,
     content: @Composable () -> Unit
 ) {
@@ -58,6 +71,7 @@ fun MenuIconButton(
         enabled = enabled,
         shape = RoundedCornerShape(16.dp),
         interactionSource = interactionSource,
+        contentPadding = contentPadding,
         onClick = onClick,
     ) {
         content()

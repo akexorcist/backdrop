@@ -1,27 +1,17 @@
 package com.akexorcist.backdrop.resource
 
+@Suppress("MayBeConstant")
 object StringResource {
-    val appName: String
-    val menuToggleUiDisplayContentDescription: String
-    val menuCloseAppContentDescription: String
-    val menuEnterToFullscreenContentDescription: String
-    val menuExitFromFullscreenContentDescription: String
-    val labelCurrentResolution: String
-    val labelResolution: String
-    val labelVideo: String
-    val labelAudioInput: String
-    val labelAudioOutput: String
-
-    init {
-        appName = "Backdrop"
-        menuToggleUiDisplayContentDescription = "Toggle UI display"
-        menuCloseAppContentDescription = "Close app"
-        menuEnterToFullscreenContentDescription = "Enter to fullscreen"
-        menuExitFromFullscreenContentDescription = "Exit from fullscreen"
-        labelCurrentResolution = "Current Resolution"
-        labelResolution = "Resolution"
-        labelVideo = "Video"
-        labelAudioInput = "Audio Input"
-        labelAudioOutput = "Audio Output"
-    }
+    val appName: String = "Backdrop"
+    val menuToggleUiDisplayContentDescription: String = "Toggle UI display"
+    val menuCloseAppContentDescription: String = "Close app"
+    val menuEnterToFullscreenContentDescription: String = "Enter to fullscreen"
+    val menuExitFromFullscreenContentDescription: String = "Exit from fullscreen"
+    val showFrameRateContentDescription: String = "Show Frame Rate"
+    val hideFrameRateContentDescription: String = "Hide Frame Rate"
+    val labelCurrentResolution: String = "Current Resolution"
+    val labelResolution: String = "Resolution"
+    val labelVideo: String = "Video"
+    val labelAudioInput: String = "Audio Input"
+    val labelAudioOutput: String = "Audio Output"
 }

@@ -3,29 +3,18 @@
 package com.akexorcist.backdrop.ui.main
 
 import androidx.compose.animation.*
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -54,6 +43,7 @@ fun MainRoute(
 
     var isDeviceConsoleShowing by remember { mutableStateOf(true) }
     var isMenuHiding by remember { mutableStateOf(false) }
+    var showFrameRate by remember { mutableStateOf(false) }
     var isHidingMenuHovered by remember { mutableStateOf(false) }
 
     MainScreen(
@@ -61,6 +51,7 @@ fun MainRoute(
         availableImageData = availableImageData,
         isDeviceConsoleShowing = isDeviceConsoleShowing,
         isMenuHiding = isMenuHiding,
+        showFrameRate = showFrameRate,
         isFullScreen = appState.isFullscreen(),
         onVideoSelect = { mainViewModel.selectVideo(it) },
         onVideoResolutionSelect = { video, resolution -> mainViewModel.setVideoResolution(video, resolution) },
@@ -70,6 +61,8 @@ fun MainRoute(
         onToggleConsoleUiClick = { isDeviceConsoleShowing = !isDeviceConsoleShowing },
         onEnterFullscreen = { coroutineScope.launch { appState.enterFullScreen() } },
         onExitFullscreenClick = { appState.exitFullScreen() },
+        onShowFrameRateClick = { showFrameRate = true },
+        onHideFrameRateClick = { showFrameRate = false },
         onCloseAppClick = { appState.exitApplication() },
     )
 
@@ -113,6 +106,7 @@ private fun MainScreen(
     availableImageData: ImageData?,
     isDeviceConsoleShowing: Boolean,
     isMenuHiding: Boolean,
+    showFrameRate: Boolean,
     isFullScreen: Boolean,
     onVideoSelect: (Video) -> Unit,
     onVideoResolutionSelect: (Video, Video.Resolution) -> Unit,
@@ -122,6 +116,8 @@ private fun MainScreen(
     onToggleConsoleUiClick: () -> Unit,
     onEnterFullscreen: () -> Unit,
     onExitFullscreenClick: () -> Unit,
+    onShowFrameRateClick: () -> Unit,
+    onHideFrameRateClick: () -> Unit,
     onCloseAppClick: () -> Unit,
 ) {
     val selectedVideo = uiState.selectedVideo
@@ -152,14 +148,17 @@ private fun MainScreen(
                 .padding(32.dp)
         ) {
             MenuButtonContainer(
-                isFullScreen = isFullScreen,
                 isToggleConsoleUiClickable = isToggleConsoleUiClickable,
                 isDeviceConsoleShowing = isDeviceConsoleShowing,
                 isMenuHiding = isMenuHiding,
+                showFrameRate = showFrameRate,
+                isFullScreen = isFullScreen,
                 onHidingMenuHovered = onHidingMenuHovered,
                 onToggleConsoleUiClick = onToggleConsoleUiClick,
-                onEnterFullscreen = onEnterFullscreen,
+                onEnterFullscreenClick = onEnterFullscreen,
                 onExitFullscreenClick = onExitFullscreenClick,
+                onShowFrameRateClick = onShowFrameRateClick,
+                onHideFrameRateClick = onHideFrameRateClick,
                 onCloseAppClick = onCloseAppClick,
             )
             Spacer(Modifier.size(16.dp))
@@ -214,6 +213,52 @@ private fun MainScreen(
                 }
             }
         }
+
+        if (showFrameRate) {
+            Box(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .align(Alignment.BottomStart)
+            ) {
+                FrameRateInformation(
+                    frameRate = uiState.selectedVideo
+                        ?.takeIf { it.name != DeviceName.VIDEO_NONE }
+                        ?.let { availableImageData?.rawFrameRate }
+                )
+            }
+        }
+    }
+}
+
+private const val FRAME_RATE_UPDATE_INTERVAL_MILLIS = 200L
+
+@Composable
+private fun FrameRateInformation(frameRate: Double?) {
+    var lastUpdatedTimeMillis by remember { mutableStateOf(System.currentTimeMillis()) }
+    var displayFrameRate by remember { mutableStateOf(frameRate) }
+    LaunchedEffect(frameRate) {
+        val currentTimeMillis = System.currentTimeMillis()
+        if (currentTimeMillis - lastUpdatedTimeMillis > FRAME_RATE_UPDATE_INTERVAL_MILLIS) {
+            displayFrameRate = frameRate
+            lastUpdatedTimeMillis = currentTimeMillis
+        }
+    }
+    Box(
+        modifier = Modifier
+            .width(50.dp)
+            .height(40.dp)
+            .background(
+                color = MaterialTheme.colors.background.copy(alpha = 0.2f),
+                shape = RoundedCornerShape(8.dp)
+            ),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = "${displayFrameRate?.toInt() ?: 0}",
+            color = MaterialTheme.colors.onBackground,
+            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.subtitle1,
+        )
     }
 }
 
@@ -232,7 +277,7 @@ private fun VideoStatusInformation(
     ) {
         val width = availableImageData.image.width
         val height = availableImageData.image.height
-        val fps = availableImageData.frameRate.toInt()
+        val fps = availableImageData.deviceFrameRate.toInt()
         Text(
             text = StringResource.labelCurrentResolution,
             color = MaterialTheme.colors.primary,

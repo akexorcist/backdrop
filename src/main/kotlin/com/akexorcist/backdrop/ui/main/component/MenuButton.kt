@@ -5,9 +5,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -25,14 +23,17 @@ import com.akexorcist.backdrop.resource.StringResource
 
 @Composable
 fun MenuButtonContainer(
-    isFullScreen: Boolean,
     isToggleConsoleUiClickable: Boolean,
     isDeviceConsoleShowing: Boolean,
     isMenuHiding: Boolean,
+    showFrameRate: Boolean,
+    isFullScreen: Boolean,
     onHidingMenuHovered: (Boolean) -> Unit,
     onToggleConsoleUiClick: () -> Unit,
-    onEnterFullscreen: () -> Unit,
+    onEnterFullscreenClick: () -> Unit,
     onExitFullscreenClick: () -> Unit,
+    onShowFrameRateClick: () -> Unit,
+    onHideFrameRateClick: () -> Unit,
     onCloseAppClick: () -> Unit,
 ) {
     val animatedButtonAlpha by animateFloatAsState(
@@ -53,7 +54,16 @@ fun MenuButtonContainer(
             onHidingMenuHovered = onHidingMenuHovered,
             onClick = when (isFullScreen) {
                 true -> onExitFullscreenClick
-                false -> onEnterFullscreen
+                false -> onEnterFullscreenClick
+            },
+        )
+        Spacer(Modifier.size(16.dp))
+        ToggleFrameRateButton(
+            showFrameRate = showFrameRate,
+            onHidingMenuHovered = onHidingMenuHovered,
+            onClick = when (showFrameRate) {
+                true -> onHideFrameRateClick
+                false -> onShowFrameRateClick
             },
         )
         Spacer(Modifier.size(16.dp))
@@ -144,6 +154,37 @@ private fun FullscreenButton(
             contentDescription = when (isFullScreen) {
                 true -> StringResource.menuExitFromFullscreenContentDescription
                 false -> StringResource.menuEnterToFullscreenContentDescription
+            },
+        )
+    }
+}
+
+@Composable
+private fun ToggleFrameRateButton(
+    showFrameRate: Boolean,
+    onHidingMenuHovered: (Boolean) -> Unit,
+    onClick: () -> Unit,
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
+
+    LaunchedEffect(isHovered) { onHidingMenuHovered(isHovered) }
+
+    MenuIconButton(
+        interactionSource = interactionSource,
+        enabled = true,
+        colors = when (showFrameRate) {
+            true -> IconButtonColors.Enabled
+            false -> IconButtonColors.Normal
+        },
+        contentPadding = PaddingValues(14.dp),
+        onClick = onClick,
+    ) {
+        Icon(
+            painter = painterResource("image/ic_frame_rate.svg"),
+            contentDescription = when (showFrameRate) {
+                true -> StringResource.showFrameRateContentDescription
+                false -> StringResource.hideFrameRateContentDescription
             },
         )
     }

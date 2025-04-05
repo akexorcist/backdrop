@@ -15,5 +15,6 @@ sealed class VideoState {
 data class ImageData(
     val image: BufferedImage,
     val timestamp: Long,
-    val frameRate: Double,
+    val deviceFrameRate: Double,
+    val rawFrameRate: Double,
 )
