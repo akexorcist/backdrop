@@ -10,6 +10,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.*
 import com.akexorcist.backdrop.di.AppModule
@@ -21,6 +22,7 @@ import com.github.eduramiba.webcamcapture.drivers.NativeDriver
 import com.github.sarxos.webcam.Webcam
 import org.koin.core.context.startKoin
 import org.koin.java.KoinJavaComponent.get
+import java.awt.Toolkit
 import java.awt.event.ComponentEvent
 import java.awt.event.ComponentListener
 import java.io.File
@@ -34,10 +36,12 @@ data class WindowInfo(
 )
 
 fun main() {
+    val screenSize = Toolkit.getDefaultToolkit().screenSize.run { IntSize(width, height) }
     val windowInfo = loadLastWindowInfo()
     startKoin { modules(AppModule.modules) }
     application {
         val windowState = rememberWindowState(
+            screenSize = screenSize,
             windowInfo = windowInfo,
         )
         val appState = rememberBackdropAppState(
@@ -136,10 +140,20 @@ private fun loadLastWindowInfo(): WindowInfo? {
     )
 }
 
+private const val OUT_OF_SCREEN_AREA_OFFSET = 10
+
 @Composable
-private fun rememberWindowState(windowInfo: WindowInfo?): WindowState {
+private fun rememberWindowState(screenSize: IntSize, windowInfo: WindowInfo?): WindowState {
     return rememberWindowState(
-        position = windowInfo?.let { info ->
+        position = windowInfo?.takeIf { info ->
+            when {
+                info.x > screenSize.width - OUT_OF_SCREEN_AREA_OFFSET -> false
+                info.x + info.width < OUT_OF_SCREEN_AREA_OFFSET -> false
+                info.y > screenSize.height - OUT_OF_SCREEN_AREA_OFFSET -> false
+                info.y + info.height < OUT_OF_SCREEN_AREA_OFFSET -> false
+                else -> true
+            }
+        }?.let { info ->
             WindowPosition.Absolute(
                 x = info.x.dp,
                 y = info.y.dp,
