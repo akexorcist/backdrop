@@ -7,11 +7,10 @@ plugins {
 }
 
 group = "com.akexorcist.backdrop"
-version = "1.0-SNAPSHOT"
+version = "1.1.0"
 
 repositories {
     mavenCentral()
-    maven { setUrl("https://jitpack.io") }
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
     google()
 }
@@ -30,7 +29,7 @@ compose.desktop {
         nativeDistributions {
             targetFormats(
                 TargetFormat.Dmg,
-//                TargetFormat.Msi,
+                TargetFormat.Msi,
             )
 
             macOS {
@@ -47,7 +46,7 @@ compose.desktop {
             }
 
             packageName = "Backdrop"
-            packageVersion = "1.0.0"
+            packageVersion = version.toString()
             description = "Video and audio projection app for your streaming content"
             licenseFile.set(project.file("LICENSE.txt"))
         }
