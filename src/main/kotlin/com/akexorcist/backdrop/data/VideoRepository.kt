@@ -4,6 +4,7 @@ import com.github.sarxos.webcam.*
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
 import java.awt.Dimension
+import kotlin.math.max
 
 interface VideoRepository {
     fun getAvailableWebcam(): Flow<List<Webcam>>
@@ -49,7 +50,7 @@ class DefaultVideoRepository(
             (dimension ?: webcam.device.resolutions.getOrNull(0))?.let {
                 webcam.device.resolution = it
             }
-            webcam.open(true)
+            webcam.open(true, sixtyFpsDelayCalculator)
             webcam.addWebcamListener(webcamListener)
             currentVideo.update { webcam }
         }
@@ -93,4 +94,8 @@ class DefaultVideoRepository(
             }
         }
     }
+}
+
+private val sixtyFpsDelayCalculator = { snapshotDuration: Long, _: Double ->
+    max(((1000 / 60) - snapshotDuration).toDouble(), 0.0).toLong()
 }
